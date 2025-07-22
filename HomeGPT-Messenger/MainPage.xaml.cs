@@ -12,9 +12,12 @@ namespace HomeGPT_Messenger
 
         public MainPage()
         {
-            InitializeComponent();
+            InitializeComponent();            
+        }
 
-            
+        private void InputEntry_Completed(object sender, EventArgs e)
+        {
+            OnSendClicked(sender, e);
         }
 
         private async void OnSendClicked(object sender, EventArgs e)
@@ -58,7 +61,7 @@ namespace HomeGPT_Messenger
             catch (Exception ex) { return $"[Error:{ex.Message}]"; }
         }
 
-        //
+        
         public class OllamaResponse
         {
             public MessageObj message { get; set; }
@@ -102,7 +105,7 @@ namespace HomeGPT_Messenger
                     : (Color)Application.Current.Resources["MessageBubbleAI"],
                     CornerRadius = 16,
                     Padding = 10,
-                    Margin = new Thickness(0, 0, 60, 0),
+                    Margin = new Thickness(10, 0, 10, 0),
                     HasShadow = false,
                     HorizontalOptions = msg.Sender == "user" ? LayoutOptions.End : LayoutOptions.Start,
                     Content =stack

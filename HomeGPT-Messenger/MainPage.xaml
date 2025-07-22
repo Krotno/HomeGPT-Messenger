@@ -11,7 +11,10 @@
         </ScrollView>
         
         <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Padding="10" BackgroundColor="{DynamicResource InputBackground}">
-            <Entry x:Name="InputEntry" Placeholder="Type your message...." TextColor="{DynamicResource TextColor}"/>
+            <Entry x:Name="InputEntry"
+                   Placeholder="Type your message...."
+                   TextColor="{DynamicResource TextColor}"
+                   Completed="InputEntry_Completed"/>
             <Button  Grid.Column="1" Text="Send" Clicked="OnSendClicked"/>
         </Grid>  
         
