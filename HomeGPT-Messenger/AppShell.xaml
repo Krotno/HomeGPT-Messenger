@@ -7,9 +7,9 @@
     Shell.FlyoutBehavior="Flyout"
     Title="HomeGPT_Messenger">
 
-    <ShellContent
+    <!--<ShellContent
         Title="Home"
         ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+        Route="MainPage" />-->
 
 </Shell>

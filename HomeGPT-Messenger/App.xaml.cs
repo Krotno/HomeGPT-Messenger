@@ -5,6 +5,17 @@
         public App()
         {
             InitializeComponent();
+
+            MainPage = new MainPage();
+        }
+
+        public void SetThem(String theme)
+        {
+            Resources.MergedDictionaries.Clear();
+            if (theme != null)
+                Resources.MergedDictionaries.Add(new Themes.Dark());
+            else
+                Resources.MergedDictionaries.Add(new Themes.Light());
         }
 
         protected override Window CreateWindow(IActivationState? activationState)
