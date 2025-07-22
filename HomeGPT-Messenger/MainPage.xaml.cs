@@ -74,6 +74,27 @@ namespace HomeGPT_Messenger
             MessagesLayout.Children.Clear();
             foreach(var msg in Messages)
             {
+                var textLabel = new Label
+                {
+                    Text = msg.Text,
+                    TextColor = (Color)Application.Current.Resources["TextColor"],
+                    FontSize = 16
+                };
+
+                var timeLabel = new Label
+                {
+                    Text = msg.Timestamp.ToString("HH:mm"),
+                    TextColor = Colors.Gray,
+                    FontSize = 10,
+                    HorizontalOptions = LayoutOptions.End
+                };
+
+                var stack = new VerticalStackLayout
+                {
+                    Spacing = 2,
+                    Children = { textLabel, timeLabel }
+                };
+
                 var frame = new Frame
                 {
                     BackgroundColor = msg.Sender == "user"
@@ -84,11 +105,7 @@ namespace HomeGPT_Messenger
                     Margin = new Thickness(0, 0, 60, 0),
                     HasShadow = false,
                     HorizontalOptions = msg.Sender == "user" ? LayoutOptions.End : LayoutOptions.Start,
-                    Content = new Label
-                    {
-                        Text = msg.Text,
-                        TextColor = (Color)Application.Current.Resources["TextColor"]
-                    }
+                    Content =stack
                 };
                 MessagesLayout.Children.Add(frame);
             }
