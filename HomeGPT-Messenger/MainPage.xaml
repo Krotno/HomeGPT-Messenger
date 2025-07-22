@@ -12,7 +12,7 @@
         
         <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Padding="10" BackgroundColor="{DynamicResource InputBackground}">
             <Entry x:Name="InputEntry" Placeholder="Type your massage...." TextColor="{DynamicResource TextColor}"/>
-            <Button Grid.Column="1" Text="Send" Clicked="OnSendClicked"/>
+            <Button  Grid.Column="1" Text="Send" Clicked="OnSendClicked"/>
         </Grid>  
         
     </Grid>

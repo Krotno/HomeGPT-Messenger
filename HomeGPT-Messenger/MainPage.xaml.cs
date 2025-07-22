@@ -19,13 +19,19 @@ namespace HomeGPT_Messenger
 
         private async void OnSendClicked(object sender, EventArgs e)
         {
-            var userText=InputEntry.Text?.Trim();
+            var userText = InputEntry.Text?.Trim();
             if (string.IsNullOrWhiteSpace(userText)) return;
 
-            //ADD message user
-            var userMassage=new Message { Sender="user", Text=userText, Timestamp=DateTime.Now};
-            Messages.Add(userMassage);
-            InputEntry.Text=string.Empty;
+            // ADD message user
+            var userMessage = new Message { Sender = "user", Text = userText, Timestamp = DateTime.Now };
+            Messages.Add(userMessage);
+            InputEntry.Text = string.Empty;
+            RenderMessages();
+
+            // ОТПРАВЛЯЕМ К LLM
+            var aiText = await SendToLLMAsync(userText);
+            var aiMessage = new Message { Sender = "ai", Text = aiText, Timestamp = DateTime.Now };
+            Messages.Add(aiMessage);
             RenderMessages();
         }
 
@@ -37,6 +43,7 @@ namespace HomeGPT_Messenger
                 var reqObj = new
                 {
                     model = "dolphin-mistral",
+                    stream=false,
                     messages = new[]
                     {
                         new { role = "user", content = prompt }
