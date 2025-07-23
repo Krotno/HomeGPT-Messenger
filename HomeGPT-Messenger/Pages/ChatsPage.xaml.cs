@@ -32,7 +32,38 @@ public partial class ChatsPage : ContentPage
 		var selected = e.CurrentSelection.FirstOrDefault() as Chat;
 		if (selected == null) return;
 
-		await Navigation.PushAsync(new MainPage(selected, chats)); // для перехода в будущем.
-		//await DisplayAlert("Чат выбран", $"Выбран{selected.Name}", "OK");
+		await Navigation.PushAsync(new MainPage(selected, chats)); // Переход + передача
+	}
+
+	private async void OnChatMenuClicked(object sender, EventArgs e)
+	{
+		if (sender is Button btn && btn.CommandParameter is Chat chat)
+		{
+			string action = await DisplayActionSheet(
+				$"Действия для \"{chat.Name}\"", "Отмена", null, "Переименовать", "Удалить");
+
+			if (action == "Переименовать")
+			{
+				string newName = await DisplayPromptAsync("Переименовать чат","Новое имя чата:", initialValue: chat.Name);
+				if (!string.IsNullOrWhiteSpace(newName))
+				{
+					chat.Name = newName;
+					await ChatStorageService.SaveChatsAsync(chats);
+					ChatsList.ItemsSource = null;//Для корректного обновления
+					ChatsList.ItemsSource = chats;
+				}
+			}
+			else if(action=="Удалить")
+			{
+				bool confirm= await DisplayAlert("Удалить чат", $"Удалить \"{chat.Name}\"?", "Да", "Нет");
+				if (confirm)
+				{
+					chats.Remove(chat);
+					await ChatStorageService.SaveChatsAsync(chats);
+					ChatsList.ItemsSource= null;
+					ChatsList.ItemsSource = chats;
+				}
+			}
+		}
 	}
 }

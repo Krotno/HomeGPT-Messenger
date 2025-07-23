@@ -11,7 +11,17 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Frame Margin="0,5" Padding="10" CornerRadius="12" BackgroundColor="{DynamicResource MessageBubbleAI}">
-                        <Label Text="{Binding Name}" FontSize="18"/>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="{Binding Name}" FontSize="18" VerticalOptions="Center"/>
+                            <Button Text="⋮" FontSize="20"
+                                    Padding="0" Margin="0,0,0,0"
+                                    BackgroundColor="Transparent"
+                                    Clicked="OnChatMenuClicked"
+                                    CommandParameter="{Binding .}"
+                                    Grid.Column="1"
+                                    HorizontalOptions="End"
+                                    VerticalOptions="Center"/>
+                        </Grid>
                     </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
