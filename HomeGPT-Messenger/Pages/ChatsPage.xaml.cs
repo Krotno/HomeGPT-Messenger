@@ -1,11 +1,14 @@
 using HomeGPT_Messenger.Models;
 using HomeGPT_Messenger.Services;
+using System;
 
 namespace HomeGPT_Messenger.Pages;
 
 public partial class ChatsPage : ContentPage
 {
-	private List<Chat> chats = new();
+    private Chat chatForMenu;//Для корректной работы окна показа удаления/переименования.
+
+    private List<Chat> chats = new();
 	public ChatsPage()
 	{
 		InitializeComponent();
@@ -39,31 +42,63 @@ public partial class ChatsPage : ContentPage
 	{
 		if (sender is Button btn && btn.CommandParameter is Chat chat)
 		{
-			string action = await DisplayActionSheet(
-				$"Действия для \"{chat.Name}\"", "Отмена", null, "Переименовать", "Удалить");
+			chatForMenu = chat;//для какого чата меню
+			ChatMenuPopup.IsVisible = true;// открытие окна
 
-			if (action == "Переименовать")
-			{
-				string newName = await DisplayPromptAsync("Переименовать чат","Новое имя чата:", initialValue: chat.Name);
-				if (!string.IsNullOrWhiteSpace(newName))
-				{
-					chat.Name = newName;
-					await ChatStorageService.SaveChatsAsync(chats);
-					ChatsList.ItemsSource = null;//Для корректного обновления
-					ChatsList.ItemsSource = chats;
-				}
-			}
-			else if(action=="Удалить")
-			{
-				bool confirm= await DisplayAlert("Удалить чат", $"Удалить \"{chat.Name}\"?", "Да", "Нет");
-				if (confirm)
-				{
-					chats.Remove(chat);
-					await ChatStorageService.SaveChatsAsync(chats);
-					ChatsList.ItemsSource= null;
-					ChatsList.ItemsSource = chats;
-				}
-			}
+			//string action = await DisplayActionSheet( //переход на другое окно
+			//	$"Действия для \"{chat.Name}\"", "Отмена", null, "Переименовать", "Удалить");
+
+			//if (action == "Переименовать")
+			//{
+			//	string newName = await DisplayPromptAsync("Переименовать чат","Новое имя чата:", initialValue: chat.Name);
+			//	if (!string.IsNullOrWhiteSpace(newName))
+			//	{
+			//		chat.Name = newName;
+			//		await ChatStorageService.SaveChatsAsync(chats);
+			//		ChatsList.ItemsSource = null;//Для корректного обновления
+			//		ChatsList.ItemsSource = chats;
+			//	}
+			//}
+			//else if(action=="Удалить")
+			//{
+			//	bool confirm= await DisplayAlert("Удалить чат", $"Удалить \"{chat.Name}\"?", "Да", "Нет");
+			//	if (confirm)
+			//	{
+			//		chats.Remove(chat);
+			//		await ChatStorageService.SaveChatsAsync(chats);
+			//		ChatsList.ItemsSource= null;
+			//		ChatsList.ItemsSource = chats;
+			//	}
+			//}
 		}
 	}
+
+	private async void Popup_RenamePressed(Object sender, EventArgs e)
+	{
+		ChatMenuPopup.IsVisible = false;
+        string newName = await DisplayPromptAsync("Переименовать чат", "Новое имя чата:", initialValue: chatForMenu.Name);
+		if (!string.IsNullOrWhiteSpace(newName))
+		{
+			chatForMenu.Name = newName;
+			await ChatStorageService.SaveChatsAsync(chats);
+			ChatsList.ItemsSource = null;//Для корректного обновления
+			ChatsList.ItemsSource = chats;
+		}
+	}
+    private async void Popup_DeletePressed(Object sender, EventArgs e)
+    {
+        ChatMenuPopup.IsVisible = false;
+        bool confirm = await DisplayAlert("Удалить чат", $"Удалить \"{chatForMenu.Name}\"?", "Да", "Нет");
+		if (confirm)
+		{
+			chats.Remove(chatForMenu);
+			await ChatStorageService.SaveChatsAsync(chats);
+			ChatsList.ItemsSource = null;
+			ChatsList.ItemsSource = chats;
+		}
+	}
+    private async void Popup_CancelPressed(Object sender, EventArgs e)
+    {
+        ChatMenuPopup.IsVisible = false;
+    }
 }

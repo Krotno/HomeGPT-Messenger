@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="HomeGPT_Messenger.Pages.Controls.PopupMenu"
+             BackgroundColor="#80000000"
+             IsVisible="False">
+    <Grid VerticalOptions="Center" HorizontalOptions="Center">
+        <Frame BackgroundColor="White"
+               CornerRadius="32"
+               Padding="24"
+               HasShadow="True"
+               WidthRequest="220">
+            <VerticalStackLayout Spacing="18" VerticalOptions="Center" HorizontalOptions="Center">
+                <Button Text="Переименовать" Clicked="RenameClicked" WidthRequest="150"/>
+                <Button Text="Удалить" Clicked="DeleteClicked" WidthRequest="150"/>
+                <Button Text="Отмена" Clicked="CancelClicked" WidthRequest="110" BackgroundColor="#eeeeee" TextColor="Black"/>
+            </VerticalStackLayout>
+        </Frame>
+    </Grid>
+</ContentView>

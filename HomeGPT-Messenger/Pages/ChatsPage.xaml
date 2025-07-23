@@ -1,30 +1,42 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:HomeGPT_Messenger.Pages.Controls"
              x:Class="HomeGPT_Messenger.Pages.ChatsPage"
              Title="Список чатов"
              BackgroundColor="{DynamicResource BackgroundColor}">
-    <VerticalStackLayout>
-        <Label Text="Список чатов" FontAttributes="Bold" FontSize="24"/>
-        <Button Text="Новый чат" Clicked="OnAddChatClicked"/>
-        <CollectionView x:Name="ChatsList" SelectionMode="Single" SelectionChanged="OnChatSelected" HeightRequest="400">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Frame Margin="0,5" Padding="10" CornerRadius="12" BackgroundColor="{DynamicResource MessageBubbleAI}">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <Label Text="{Binding Name}" FontSize="18" VerticalOptions="Center"/>
-                            <Button Text="⋮" FontSize="20"
-                                    Padding="0" Margin="0,0,0,0"
-                                    BackgroundColor="Transparent"
-                                    Clicked="OnChatMenuClicked"
-                                    CommandParameter="{Binding .}"
-                                    Grid.Column="1"
-                                    HorizontalOptions="End"
-                                    VerticalOptions="Center"/>
-                        </Grid>
-                    </Frame>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-    </VerticalStackLayout>
+    <Grid>
+        <VerticalStackLayout>
+            <Label Text="Список чатов" FontAttributes="Bold" FontSize="24"/>
+            <Button Text="Новый чат" Clicked="OnAddChatClicked"/>
+            <CollectionView x:Name="ChatsList" SelectionMode="Single" SelectionChanged="OnChatSelected" HeightRequest="400">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Margin="0,5" Padding="10" CornerRadius="12" BackgroundColor="{DynamicResource MessageBubbleAI}">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="{Binding Name}" FontSize="18" VerticalOptions="Center"/>
+                                <Button Text="⋮" FontSize="24"
+                                WidthRequest="30" HeightRequest="30"
+                                CornerRadius="18" Padding="0"
+                                Margin="0" BorderWidth="1"
+                                FontAttributes="Bold"
+                                BackgroundColor="#eeeeee"
+                                BorderColor="#cccccc"
+                                Clicked="OnChatMenuClicked"
+                                CommandParameter="{Binding .}"
+                                Grid.Column="1"
+                                HorizontalOptions="End"
+                                VerticalOptions="Center"/>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+        <controls:PopupMenu x:Name="ChatMenuPopup" IsVisible="False"
+          RenamePressed="Popup_RenamePressed"
+          DeletePressed="Popup_DeletePressed"
+          CancelPressed="Popup_CancelPressed"/>
+    </Grid>    
 </ContentPage>
+
