@@ -1,4 +1,5 @@
 ﻿using HomeGPT_Messenger.Models;
+using HomeGPT_Messenger.Services;
 using System.Net.Http.Json;
 
 
@@ -7,12 +8,20 @@ namespace HomeGPT_Messenger
     public partial class MainPage : ContentPage
     {
         private List<Message> Messages = new();
+        /// <summary>
+        /// Отвечает за передачу переписки
+        /// </summary>
+        private Chat currentChat;
+        private List<Chat> allChats;
 
         private const string OLLAMA_URL = "http://192.168.3.77:11434/api/chat";
 
-        public MainPage()
+        public MainPage(Chat chat,List<Chat> chats)
         {
-            InitializeComponent();            
+            InitializeComponent();
+            currentChat = chat;
+            allChats = chats;
+            RenderMessages();
         }
 
         private void InputEntry_Completed(object sender, EventArgs e)
@@ -27,15 +36,17 @@ namespace HomeGPT_Messenger
 
             // ADD message user
             var userMessage = new Message { Sender = "user", Text = userText, Timestamp = DateTime.Now };
-            Messages.Add(userMessage);
+            currentChat.Messages.Add(userMessage);
             InputEntry.Text = string.Empty;
             RenderMessages();
 
             // ОТПРАВЛЯЕМ К LLM
             var aiText = await SendToLLMAsync(userText);
             var aiMessage = new Message { Sender = "ai", Text = aiText, Timestamp = DateTime.Now };
-            Messages.Add(aiMessage);
+            currentChat.Messages.Add(aiMessage);
             RenderMessages();
+
+            await ChatStorageService.SaveChatsAsync(allChats);
         }
 
         private async Task<string> SendToLLMAsync(string prompt)
@@ -75,7 +86,7 @@ namespace HomeGPT_Messenger
         private void RenderMessages()
         {
             MessagesLayout.Children.Clear();
-            foreach(var msg in Messages)
+            foreach(var msg in currentChat.Messages)
             {
                 var textLabel = new Label
                 {

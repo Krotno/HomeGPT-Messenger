@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HomeGPT_Messenger.Models
 {
-    internal class Message
+    public class Message
     {
         public string Sender { get; set; }// "User" and "LLM"
         public string Text { get; set; }//info

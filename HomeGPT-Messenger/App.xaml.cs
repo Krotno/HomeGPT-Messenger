@@ -1,4 +1,6 @@
-﻿namespace HomeGPT_Messenger
+﻿using HomeGPT_Messenger.Pages;
+
+namespace HomeGPT_Messenger
 {
     public partial class App : Application
     {
@@ -6,7 +8,8 @@
         {
             InitializeComponent();
 
-            MainPage = new MainPage();
+            //MainPage = new MainPage();
+            MainPage = new NavigationPage(new ChatsPage());
         }
 
         public void SetThem(String theme)
