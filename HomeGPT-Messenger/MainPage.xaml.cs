@@ -1,4 +1,5 @@
 ﻿using HomeGPT_Messenger.Models;
+using HomeGPT_Messenger.Pages;
 using HomeGPT_Messenger.Services;
 using System.Net.Http.Json;
 
@@ -22,6 +23,7 @@ namespace HomeGPT_Messenger
             currentChat = chat;
             allChats = chats;
             RenderMessages();
+            NavigationPage.SetHasBackButton(this, false);
         }
 
         private void InputEntry_Completed(object sender, EventArgs e)
@@ -124,6 +126,24 @@ namespace HomeGPT_Messenger
                 MessagesLayout.Children.Add(frame);
             }
         }
-    }
+        #region ButtonMenu (Кнопки меню)
+        private void OnMenuButtonCliCked(object sender, EventArgs e)
+        {
+            SideMenu.IsVisible = !SideMenu.IsVisible;
+        }
 
+        private async void OnChatsClicked(object sender, EventArgs e)
+        {
+            SideMenu.IsVisible = false;
+            await Navigation.PushAsync(new ChatsPage());
+
+        }
+
+        private async void OnSettingsClicked(object sender, EventArgs e)
+        {
+            SideMenu.IsVisible = false;
+            await Navigation.PushAsync(new SettingsPage());
+        }
+        #endregion
+    }
 }

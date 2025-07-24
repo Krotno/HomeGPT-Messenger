@@ -71,6 +71,9 @@
 	  <MauiXaml Update="Pages\Controls\PopupMenu.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Pages\SettingsPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Themes\Dark.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

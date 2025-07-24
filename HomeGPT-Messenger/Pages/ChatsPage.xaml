@@ -3,11 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:HomeGPT_Messenger.Pages.Controls"
              x:Class="HomeGPT_Messenger.Pages.ChatsPage"
-             Title="Список чатов"
              BackgroundColor="{DynamicResource BackgroundColor}">
     <Grid>
         <VerticalStackLayout>
-            <Label Text="Список чатов" FontAttributes="Bold" FontSize="24"/>
+            <Grid>
+                <Button Text="☰" Clicked="OnMenuButtonClicked" HorizontalOptions="Start"/>
+                <Label Text="Список чатов" FontAttributes="Bold" FontSize="24" HorizontalOptions="Center"/>
+            </Grid>
             <Button Text="Новый чат" Clicked="OnAddChatClicked"/>
             <CollectionView x:Name="ChatsList" SelectionMode="Single" SelectionChanged="OnChatSelected" HeightRequest="400">
                 <CollectionView.ItemTemplate>
@@ -37,6 +39,13 @@
           RenamePressed="Popup_RenamePressed"
           DeletePressed="Popup_DeletePressed"
           CancelPressed="Popup_CancelPressed"/>
+        <Grid x:Name="SideMenu" IsVisible="False" BackgroundColor="#DDFFFFFF"
+              WidthRequest="200" VerticalOptions="Fill" HorizontalOptions="Start">
+            <VerticalStackLayout Padding="16,32">
+                <Button Text="Чаты" Clicked="OnChatsClicked"/>
+                <Button Text="Настройки" Clicked="OnSettingsClicked"/>
+            </VerticalStackLayout>
+        </Grid>
     </Grid>    
 </ContentPage>
 

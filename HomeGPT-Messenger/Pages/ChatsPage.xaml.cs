@@ -13,7 +13,8 @@ public partial class ChatsPage : ContentPage
 	{
 		InitializeComponent();
 		LoadChats();
-	}
+        NavigationPage.SetHasBackButton(this, false);
+    }
 
 	private async void LoadChats()
 	{
@@ -23,7 +24,9 @@ public partial class ChatsPage : ContentPage
 
 	private async void OnAddChatClicked(object sender,EventArgs e)//test
 	{
-		var chat = new Chat {Name = "Новый чат " +DateTime.Now.ToShortDateString()};
+		string name = await DisplayPromptAsync("Новый чат", "Введите название чата: ");
+		if (string.IsNullOrWhiteSpace(name)) return;
+		var chat=new Chat { Name= name };
 		chats.Add(chat);
 		await ChatStorageService.SaveChatsAsync(chats);
         ChatsList.ItemsSource = null;
@@ -44,36 +47,29 @@ public partial class ChatsPage : ContentPage
 		{
 			chatForMenu = chat;//для какого чата меню
 			ChatMenuPopup.IsVisible = true;// открытие окна
-
-			//string action = await DisplayActionSheet( //переход на другое окно
-			//	$"Действия для \"{chat.Name}\"", "Отмена", null, "Переименовать", "Удалить");
-
-			//if (action == "Переименовать")
-			//{
-			//	string newName = await DisplayPromptAsync("Переименовать чат","Новое имя чата:", initialValue: chat.Name);
-			//	if (!string.IsNullOrWhiteSpace(newName))
-			//	{
-			//		chat.Name = newName;
-			//		await ChatStorageService.SaveChatsAsync(chats);
-			//		ChatsList.ItemsSource = null;//Для корректного обновления
-			//		ChatsList.ItemsSource = chats;
-			//	}
-			//}
-			//else if(action=="Удалить")
-			//{
-			//	bool confirm= await DisplayAlert("Удалить чат", $"Удалить \"{chat.Name}\"?", "Да", "Нет");
-			//	if (confirm)
-			//	{
-			//		chats.Remove(chat);
-			//		await ChatStorageService.SaveChatsAsync(chats);
-			//		ChatsList.ItemsSource= null;
-			//		ChatsList.ItemsSource = chats;
-			//	}
-			//}
 		}
 	}
+	#region ButtonMenu (Кнопки меню)
+	private void OnMenuButtonClicked(object sender, EventArgs e)
+	{
+        SideMenu.IsVisible = !SideMenu.IsVisible;
+	}
 
-	private async void Popup_RenamePressed(Object sender, EventArgs e)
+	private async void OnChatsClicked(object sender, EventArgs e)
+	{
+		SideMenu.IsVisible = false;
+		await Navigation.PushAsync(new ChatsPage());
+
+    }
+
+	private async void OnSettingsClicked(object sender, EventArgs e)
+	{
+		SideMenu.IsVisible = false;
+		await Navigation.PushAsync(new SettingsPage());
+	}
+    #endregion
+    #region PopupMenu (модули удаление и Rename)
+    private async void Popup_RenamePressed(Object sender, EventArgs e)
 	{
 		ChatMenuPopup.IsVisible = false;
         string newName = await DisplayPromptAsync("Переименовать чат", "Новое имя чата:", initialValue: chatForMenu.Name);
@@ -101,4 +97,5 @@ public partial class ChatsPage : ContentPage
     {
         ChatMenuPopup.IsVisible = false;
     }
+    #endregion
 }
