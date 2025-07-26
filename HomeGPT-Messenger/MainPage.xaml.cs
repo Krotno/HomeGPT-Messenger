@@ -43,7 +43,7 @@ namespace HomeGPT_Messenger
             RenderMessages();
 
             // ОТПРАВЛЯЕМ К LLM
-            var aiText = await SendToLLMAsync(userText);
+            var aiText = await SendToLLMAsync(currentChat);
             var aiMessage = new Message { Sender = "ai", Text = aiText, Timestamp = DateTime.Now };
             currentChat.Messages.Add(aiMessage);
             RenderMessages();
@@ -51,27 +51,49 @@ namespace HomeGPT_Messenger
             await ChatStorageService.SaveChatsAsync(allChats);
         }
 
-        private async Task<string> SendToLLMAsync(string prompt)
+        private bool isWaiting = false;
+        private async Task<string> SendToLLMAsync(Chat chat)
         {
+            if (isWaiting) return string.Empty;
+            isWaiting = true;
+
+            SendButton.IsEnabled=false;
+            SendButton.Opacity = 0.5;
             try
             {
-                using var client = new HttpClient();
-                var reqObj = new
+                try
                 {
-                    model = "dolphin-mistral",
-                    stream=false,
-                    messages = new[]
+                    using var client = new HttpClient();
+                    client.Timeout = TimeSpan.FromMinutes(5);//ждет ответа моедли 5 минут
+                    var messagesForLLM = chat.Messages.Select(mbox => new
                     {
-                        new { role = "user", content = prompt }
-                    }
-                };
-                var response = await client.PostAsJsonAsync(OLLAMA_URL, reqObj);
-                response.EnsureSuccessStatusCode();
+                        role = mbox.Sender == "user" ? "user" : "assistant",
+                        Content = mbox.Text
+                    }).ToList();
 
-                var json = await response.Content.ReadFromJsonAsync<OllamaResponse>();
-                return json?.message?.content ?? "(No response)";
+                    //currentChat.Messages.TakeLast(20).Select(mbox => new // В дальнейшем для ограничения количества запросов на 20
+
+                    var reqObj = new
+                    {
+                        model = "dolphin-mistral",
+                        stream = false,
+                        messages = messagesForLLM
+                    };
+                    var response = await client.PostAsJsonAsync(OLLAMA_URL, reqObj);
+                    response.EnsureSuccessStatusCode();
+
+                    var json = await response.Content.ReadFromJsonAsync<OllamaResponse>();
+                    return json?.message?.content ?? "(No response)";
+                }
+                catch (Exception ex) { return $"[Error:{ex.Message}]"; }
             }
-            catch (Exception ex) { return $"[Error:{ex.Message}]"; }
+            finally
+            {
+                SendButton.IsEnabled = true;
+                SendButton.Opacity = 1;
+                isWaiting=false;
+            }
+           
         }
 
         
@@ -118,16 +140,17 @@ namespace HomeGPT_Messenger
                     : (Color)Application.Current.Resources["MessageBubbleAI"],
                     CornerRadius = 16,
                     Padding = 10,
-                    Margin = new Thickness(10, 0, 10, 0),
+                    Margin = new Thickness(10,5),
                     HasShadow = false,
                     HorizontalOptions = msg.Sender == "user" ? LayoutOptions.End : LayoutOptions.Start,
-                    Content =stack
+                    Content =stack,
+                    MaximumWidthRequest=700
                 };
                 MessagesLayout.Children.Add(frame);
             }
         }
         #region ButtonMenu (Кнопки меню)
-        private void OnMenuButtonCliCked(object sender, EventArgs e)
+        private void OnMenuButtonClicked(object sender, EventArgs e)
         {
             SideMenu.IsVisible = !SideMenu.IsVisible;
         }

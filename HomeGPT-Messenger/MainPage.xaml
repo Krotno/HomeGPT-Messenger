@@ -1,24 +1,55 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-    <!--Поехал гуи надо пересобрать-->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              BackgroundColor="{DynamicResource BackgroundColor}"
              x:Class="HomeGPT_Messenger.MainPage"
              Title="LLM Test">
-    <Grid RowDefinitions="*,auto"> 
+    <Grid>
+        <Grid RowDefinitions="48,*,auto">
+            <Grid Grid.Row="0" HeightRequest="48" BackgroundColor="{DynamicResource BackgroundColor}">
+                <Button Text="☰" Clicked="OnMenuButtonClicked" HorizontalOptions="Start"/>
+            </Grid>
 
-        <Grid HeightRequest="48" Grid.Row="0">
-            <Button Text="☰" Clicked="OnMenuButtonCliCked" WidthRequest="40"
-                    HeightRequest="40" CornerRadius="20" BackgroundColor="#eeeeee"
-                    FontSize="20" HorizontalOptions="Start" VerticalOptions="Center"
-                    Margin="8,8,0,0"/>
+            <ScrollView Grid.Row="1" Margin="0,0,0,0">
+                <VerticalStackLayout x:Name="MessagesLayout" Spacing="8" Padding="10"/>
+            </ScrollView>
+
+            <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Padding="10" BackgroundColor="{DynamicResource InputBackground}">
+                <Entry x:Name="InputEntry"
+                       Placeholder="Type your message...."
+                       TextColor="{DynamicResource TextColor}"
+                       Completed="InputEntry_Completed"/>
+                <Button Grid.Column="1" Text="Send" x:Name="SendButton" Clicked="OnSendClicked"/>
+            </Grid>
         </Grid>
 
-        <ScrollView Grid.Row="0">
+        <Grid x:Name="SideMenu"
+              IsVisible="False"
+              BackgroundColor="#DDFFFFFF"
+              WidthRequest="200"
+              VerticalOptions="Fill"
+              HorizontalOptions="Start"
+              ZIndex="100"
+              Margin="0,0,0,0">
+            <VerticalStackLayout Padding="16,32">
+                <Button Text="Чаты" Clicked="OnChatsClicked"/>
+                <Button Text="Настройки" Clicked="OnSettingsClicked"/>
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
+</ContentPage>
+    
+    <!--<Grid RowDefinitions="48,*,auto">
+
+        <Grid Grid.Row="0" HeightRequest="48" BackgroundColor="{DynamicResource BackgroundColor}">
+            <Button Text="☰" Clicked="OnMenuButtonClicked" HorizontalOptions="Start"/>
+        </Grid>
+
+        <ScrollView Grid.Row="1" Margin="0,0,0,0">
             <VerticalStackLayout x:Name="MessagesLayout" Spacing="8" Padding="10"/>
         </ScrollView>
         
-        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Padding="10" BackgroundColor="{DynamicResource InputBackground}">
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Padding="10" BackgroundColor="{DynamicResource InputBackground}">
             <Entry x:Name="InputEntry"
                    Placeholder="Type your message...."
                    TextColor="{DynamicResource TextColor}"
@@ -26,13 +57,12 @@
             <Button  Grid.Column="1" Text="Send" Clicked="OnSendClicked"/>
         </Grid>
 
-        <Grid Grid.Row="0" x:Name="SideMenu" IsVisible="False" BackgroundColor="#DDFFFFFF"
-        WidthRequest="200" VerticalOptions="Start" HorizontalOptions="Start">
+        <Grid x:Name="SideMenu" IsVisible="False" BackgroundColor="#DDFFFFFF"
+        WidthRequest="200" VerticalOptions="Fill" HorizontalOptions="Start">
             <VerticalStackLayout Padding="16,32">
                 <Button Text="Чаты" Clicked="OnChatsClicked"/>
                 <Button Text="Настройки" Clicked="OnSettingsClicked"/>
             </VerticalStackLayout>
         </Grid>
 
-    </Grid>
-</ContentPage>
+    </Grid>-->
