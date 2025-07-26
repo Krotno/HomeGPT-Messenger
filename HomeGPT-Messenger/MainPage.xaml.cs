@@ -2,6 +2,7 @@
 using HomeGPT_Messenger.Pages;
 using HomeGPT_Messenger.Services;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 
 namespace HomeGPT_Messenger
@@ -35,72 +36,86 @@ namespace HomeGPT_Messenger
 
         private async void OnSendClicked(object sender, EventArgs e)
         {
-            ChatStatusLabel.Text = "Ожидайте ответа.....";
-            var userText = InputEntry.Text?.Trim();
-            if (string.IsNullOrWhiteSpace(userText)) return;
-
-            // ADD message user
-            var userMessage = new Message { Sender = "user", Text = userText, Timestamp = DateTime.Now };
-            currentChat.Messages.Add(userMessage);
-            InputEntry.Text = string.Empty;
-            RenderMessages();
-
-            // ОТПРАВЛЯЕМ К LLM
-            var aiText = await SendToLLMAsync(currentChat);
-            var aiMessage = new Message { Sender = "ai", Text = aiText, Timestamp = DateTime.Now };
-            currentChat.Messages.Add(aiMessage);
-            RenderMessages();
-
-            await ChatStorageService.SaveChatsAsync(allChats);
-        }
-
-        private bool isWaiting = false;
-        private async Task<string> SendToLLMAsync(Chat chat)
-        {
-            if (isWaiting) return string.Empty;
-            isWaiting = true;
-
-            SendButton.IsEnabled=false;
-            SendButton.Opacity = 0.5;
             try
             {
-                try
+                ChatStatusLabel.Text = "Ожидайте ответа.....";
+                var userText = InputEntry.Text?.Trim();
+                if (string.IsNullOrWhiteSpace(userText))
                 {
-                    using var client = new HttpClient();
-                    client.Timeout = TimeSpan.FromMinutes(5);//ждет ответа моедли 5 минут
-                    var messagesForLLM = chat.Messages.Select(mbox => new
-                    {
-                        role = mbox.Sender == "user" ? "user" : "assistant",
-                        Content = mbox.Text
-                    }).ToList();
-
-                    //currentChat.Messages.TakeLast(20).Select(mbox => new // В дальнейшем для ограничения количества запросов на 20
-
-                    var reqObj = new
-                    {
-                        model = "dolphin-mistral",
-                        stream = false,
-                        messages = messagesForLLM
-                    };
-                    var response = await client.PostAsJsonAsync(OLLAMA_URL, reqObj);
-                    response.EnsureSuccessStatusCode();
-
-                    var json = await response.Content.ReadFromJsonAsync<OllamaResponse>();
-                    return json?.message?.content ?? "(No response)";
+                    SendButton.IsEnabled = true;
+                    SendButton.Opacity = 1;
+                    isWaiting = false;
+                    InputEntry.Text = string.Empty;
+                    ChatStatusLabel.Text = "Готов";
+                    return;
                 }
-                catch (Exception ex) { return $"[Error:{ex.Message}]"; }
+
+                var userMessage = new Message { Sender = "user", Text = userText, Timestamp = DateTime.Now };//Собирает сообщение пользователя
+                currentChat.Messages.Add(userMessage);
+                RenderMessages();
+                InputEntry.Text = string.Empty;
+                var allMessages = currentChat.Messages.ToList();//Копирует историю + текущее сообщение
+                var aiText = await SendToLLMAsync(currentChat, allMessages);//отправка копии
+                                
+                var aiMessage = new Message { Sender = "ai", Text = aiText, Timestamp = DateTime.Now };//добавление aiMessage в историю
+                currentChat.Messages.Add(aiMessage);
+
+                RenderMessages();
+                await ChatStorageService.SaveChatsAsync(allChats);
+                ChatStatusLabel.Text = "Готов";
             }
             finally
             {
                 SendButton.IsEnabled = true;
                 SendButton.Opacity = 1;
-                isWaiting=false;
-                ChatStatusLabel.Text = "Готов";
+                isWaiting = false;
             }
-           
+            
         }
 
-        
+        private bool isWaiting = false;
+        private async Task<string> SendToLLMAsync(Chat chat,List<Message> messages)
+        {
+            if (isWaiting) return string.Empty;
+            isWaiting = true;
+            SendButton.IsEnabled=false;
+            SendButton.Opacity = 0.5;
+
+            try
+            {
+                using var client = new HttpClient();
+                client.Timeout = TimeSpan.FromMinutes(5);//ждет ответа модели 5 минут
+                var messagesForLLM = messages.Select(mbox => new
+                {
+                    role = mbox.Sender == "user" ? "user" : "assistant",
+                    content = mbox.Text
+                }).ToList();
+
+                //currentChat.Messages.TakeLast(20).Select(mbox => new // В дальнейшем для ограничения количества запросов на 20
+
+                var reqObj = new
+                {
+                    model = "dolphin-mistral",
+                    stream = false,
+                    messages = messagesForLLM
+                };
+                //var jsonReq = JsonSerializer.Serialize(reqObj, new JsonSerializerOptions()//тест уходящей инфы
+                //{
+                //    WriteIndented = true,
+                //    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                //});                
+                //await DisplayAlert("Отправляймые", jsonReq, "OK");
+                var response = await client.PostAsJsonAsync(OLLAMA_URL, reqObj);
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadFromJsonAsync<OllamaResponse>();
+                return json?.message?.content ?? "(No response)";
+            }
+            catch (Exception ex) { return $"[Error:{ex.Message}]"; }
+
+        }
+
+
         public class OllamaResponse
         {
             public MessageObj message { get; set; }
@@ -153,6 +168,7 @@ namespace HomeGPT_Messenger
                 MessagesLayout.Children.Add(frame);
             }
         }
+
         #region Overlay (для меню)
         private void OnMenuOverlayTapped(object sender, EventArgs e)
         {
