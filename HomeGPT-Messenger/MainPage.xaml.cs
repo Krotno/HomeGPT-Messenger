@@ -24,6 +24,8 @@ namespace HomeGPT_Messenger
             allChats = chats;
             RenderMessages();
             NavigationPage.SetHasBackButton(this, false);
+            ChatNameLabel.Text = currentChat.Name;
+            ChatStatusLabel.Text = "Готов";
         }
 
         private void InputEntry_Completed(object sender, EventArgs e)
@@ -33,6 +35,7 @@ namespace HomeGPT_Messenger
 
         private async void OnSendClicked(object sender, EventArgs e)
         {
+            ChatStatusLabel.Text = "Ожидайте ответа.....";
             var userText = InputEntry.Text?.Trim();
             if (string.IsNullOrWhiteSpace(userText)) return;
 
@@ -92,6 +95,7 @@ namespace HomeGPT_Messenger
                 SendButton.IsEnabled = true;
                 SendButton.Opacity = 1;
                 isWaiting=false;
+                ChatStatusLabel.Text = "Готов";
             }
            
         }
@@ -149,6 +153,14 @@ namespace HomeGPT_Messenger
                 MessagesLayout.Children.Add(frame);
             }
         }
+        #region Overlay (для меню)
+        private void OnMenuOverlayTapped(object sender, EventArgs e)
+        {
+            SideMenu.IsVisible = false;
+            MenuOverlay.IsVisible = false;
+        }
+        #endregion
+
         #region ButtonMenu (Кнопки меню)
         private void OnMenuButtonClicked(object sender, EventArgs e)
         {

@@ -7,8 +7,15 @@ public partial class SettingsPage : ContentPage
         InitializeComponent();
         NavigationPage.SetHasBackButton(this, false);
     }
+    #region Overlay (дл€ меню)
+    private void OnMenuOverlayTapped(object sender, EventArgs e)
+    {
+        SideMenu.IsVisible = false;
+        MenuOverlay.IsVisible = false;
+    }
+    #endregion
     #region ButtonMenu ( нопки меню)
-    private void OnMenuButtonCliCked(object sender, EventArgs e)
+    private void OnMenuButtonClicked(object sender, EventArgs e)
     {
         SideMenu.IsVisible = !SideMenu.IsVisible;
     }

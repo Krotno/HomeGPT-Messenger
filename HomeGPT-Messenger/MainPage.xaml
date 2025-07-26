@@ -6,8 +6,13 @@
              Title="LLM Test">
     <Grid>
         <Grid RowDefinitions="48,*,auto">
-            <Grid Grid.Row="0" HeightRequest="48" BackgroundColor="{DynamicResource BackgroundColor}">
-                <Button Text="☰" Clicked="OnMenuButtonClicked" HorizontalOptions="Start"/>
+            <Grid Grid.Row="0" BackgroundColor="{DynamicResource BackgroundColor}">
+                <Button Grid.Column="0" Text="☰" Margin="0,16,0,0" Clicked="OnMenuButtonClicked" HorizontalOptions="Start"/>
+
+                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Center">
+                    <Label x:Name="ChatNameLabel" Text="Имя чата" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center"/>
+                    <Label x:Name="ChatStatusLabel" Text="Готов" FontSize="12" TextColor="Gray" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
             </Grid>
 
             <ScrollView Grid.Row="1" Margin="0,0,0,0">
@@ -22,6 +27,13 @@
                 <Button Grid.Column="1" Text="Send" x:Name="SendButton" Clicked="OnSendClicked"/>
             </Grid>
         </Grid>
+
+        <BoxView x:Name="MenuOverlay" IsVisible="{Binding Source={x:Reference SideMenu}, Path=IsVisible}"
+                 BackgroundColor="#88000000" InputTransparent="False">
+            <BoxView.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnMenuOverlayTapped"/>
+            </BoxView.GestureRecognizers>
+        </BoxView>
 
         <Grid x:Name="SideMenu"
               IsVisible="False"

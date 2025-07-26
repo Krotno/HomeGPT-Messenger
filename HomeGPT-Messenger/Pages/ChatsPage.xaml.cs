@@ -49,8 +49,15 @@ public partial class ChatsPage : ContentPage
 			ChatMenuPopup.IsVisible = true;// открытие окна
 		}
 	}
-	#region ButtonMenu ( нопки меню)
-	private void OnMenuButtonClicked(object sender, EventArgs e)
+    #region Overlay (дл€ меню)
+    private void OnMenuOverlayTapped(object sender, EventArgs e)
+    {
+        SideMenu.IsVisible = false;
+        MenuOverlay.IsVisible = false;
+    }
+    #endregion
+    #region ButtonMenu ( нопки меню)
+    private void OnMenuButtonClicked(object sender, EventArgs e)
 	{
         SideMenu.IsVisible = !SideMenu.IsVisible;
 	}
