@@ -53,7 +53,6 @@ public partial class ChatsPage : ContentPage
     private void OnMenuOverlayTapped(object sender, EventArgs e)
     {
         SideMenu.IsVisible = false;
-        MenuOverlay.IsVisible = false;
     }
     #endregion
     #region ButtonMenu ( нопки меню)

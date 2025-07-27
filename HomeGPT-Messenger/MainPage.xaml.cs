@@ -27,6 +27,7 @@ namespace HomeGPT_Messenger
             NavigationPage.SetHasBackButton(this, false);
             ChatNameLabel.Text = currentChat.Name;
             ChatStatusLabel.Text = "Готов";
+            
         }
 
         private void InputEntry_Completed(object sender, EventArgs e)
@@ -53,14 +54,15 @@ namespace HomeGPT_Messenger
                 var userMessage = new Message { Sender = "user", Text = userText, Timestamp = DateTime.Now };//Собирает сообщение пользователя
                 currentChat.Messages.Add(userMessage);
                 RenderMessages();
+                await ScrollMessagesToEndAsync();//листает вниз
                 InputEntry.Text = string.Empty;
+                InputEntry.Focus();                
                 var allMessages = currentChat.Messages.ToList();//Копирует историю + текущее сообщение
                 var aiText = await SendToLLMAsync(currentChat, allMessages);//отправка копии
-                                
                 var aiMessage = new Message { Sender = "ai", Text = aiText, Timestamp = DateTime.Now };//добавление aiMessage в историю
                 currentChat.Messages.Add(aiMessage);
-
                 RenderMessages();
+                await ScrollMessagesToEndAsync();// листает вниз
                 await ChatStorageService.SaveChatsAsync(allChats);
                 ChatStatusLabel.Text = "Готов";
             }
@@ -169,11 +171,24 @@ namespace HomeGPT_Messenger
             }
         }
 
-        #region Overlay (для меню)
+        #region Scroll (Листает вниз)
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            _ = ScrollMessagesToEndAsync();
+        }
+
+        private async Task ScrollMessagesToEndAsync()
+        {
+            await Task.Delay(50);//Время для отрисовки
+            await MessagesScrollView.ScrollToAsync(0, MessagesLayout.Height, true);
+        }
+        #endregion
+
+        #region Overlay (Для меню)
         private void OnMenuOverlayTapped(object sender, EventArgs e)
         {
             SideMenu.IsVisible = false;
-            MenuOverlay.IsVisible = false;
         }
         #endregion
 

@@ -15,7 +15,7 @@
                 </VerticalStackLayout>
             </Grid>
 
-            <ScrollView Grid.Row="1" Margin="0,0,0,0">
+            <ScrollView x:Name="MessagesScrollView" Grid.Row="1" Margin="0,0,0,0">
                 <VerticalStackLayout x:Name="MessagesLayout" Spacing="8" Padding="10"/>
             </ScrollView>
 
@@ -23,7 +23,8 @@
                 <Entry x:Name="InputEntry"
                        Placeholder="Type your message...."
                        TextColor="{DynamicResource TextColor}"
-                       Completed="InputEntry_Completed"/>
+                       Completed="InputEntry_Completed"
+                       TextChanged="InputEntry_TextChanged"/>
                 <Button Grid.Column="1" Text="Send" x:Name="SendButton" Clicked="OnSendClicked"/>
             </Grid>
         </Grid>
