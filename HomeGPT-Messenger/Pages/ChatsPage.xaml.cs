@@ -38,8 +38,8 @@ public partial class ChatsPage : ContentPage
 		var selected = e.CurrentSelection.FirstOrDefault() as Chat;
 		if (selected == null) return;
 
-		await Navigation.PushAsync(new MainPage(selected, chats)); // Переход + передача
-	}
+        await Navigation.PushAsync(new MainPage(selected.Id, chats)); // Переход + передача
+    }
 
 	private async void OnChatMenuClicked(object sender, EventArgs e)
 	{

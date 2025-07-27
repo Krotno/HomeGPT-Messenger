@@ -4,6 +4,7 @@ using HomeGPT_Messenger.Services;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Maui.Controls;
+using System.Threading.Tasks;
 
 
 namespace HomeGPT_Messenger
@@ -16,20 +17,48 @@ namespace HomeGPT_Messenger
         /// </summary>
         private Chat currentChat;
         private List<Chat> allChats;
+        private CancellationTokenSource _typingStatusCts;//для удобной работы анимации
 
         private const string OLLAMA_URL = "http://192.168.3.77:11434/api/chat";
 
-        public MainPage(Chat chat,List<Chat> chats)
+        public MainPage(Guid chatId,List<Chat> chats)
         {
             InitializeComponent();
-            currentChat = chat;
+            currentChat = chats.FirstOrDefault(c=>c.Id==chatId);
             allChats = chats;
             RenderMessages();
             NavigationPage.SetHasBackButton(this, false);
-            ChatNameLabel.Text = currentChat.Name;
+            ChatNameLabel.Text = currentChat.Name??"Чат";
             ChatStatusLabel.Text = "Готов";
             
         }
+
+        #region Animation(Анимации Ассистент)
+        private async Task StartTypingStatusAsync()
+        {
+            _typingStatusCts?.Cancel();
+            _typingStatusCts=new CancellationTokenSource();
+            var token=_typingStatusCts.Token;
+            string baseText = "Ассистент генерирует ответ";
+            int maxDots = 5;
+            int dots = 0;
+            while (!token.IsCancellationRequested)
+            {
+                dots = (dots + 1) % (maxDots + 1);
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    ChatStatusLabel.Text = baseText + new string('.', dots);
+                });                
+                await Task.Delay(400, token);
+            }
+        }
+
+        private void StopTypingStatus()
+        {
+            _typingStatusCts?.Cancel();
+            ChatStatusLabel.Text = "Готов";
+        }
+        #endregion
 
         private void InputEntry_Completed(object sender, EventArgs e)
         {
@@ -44,29 +73,52 @@ namespace HomeGPT_Messenger
             SendButton.Opacity = 0.5;
             try
             {
-                ChatStatusLabel.Text = "Ожидайте ответа.....";
                 var userText = InputEntry.Text?.Trim();
                 if (string.IsNullOrWhiteSpace(userText))
                 {
                     InputEntry.Text = string.Empty;
-                    ChatStatusLabel.Text = "Готов";
+                    StopTypingStatus();
                     return;
                 }
 
-                var userMessage = new Message { Sender = "user", Text = userText, Timestamp = DateTime.Now };//Собирает сообщение пользователя
+                var userMessage = new Message 
+                { Sender = "user",
+                  Text = userText,
+                  Timestamp = DateTime.Now,
+                  Status = MessageStatus.WaitingForResponse//Прикрутка в будущем статуса
+                };//Собирает сообщение пользователя
                 currentChat.Messages.Add(userMessage);
-                RenderMessages();
+                await ChatStorageService.SaveChatsAsync(allChats);
+                RenderMessages(); 
                 InputEntry.Text = string.Empty;
                 await ScrollMessagesToEndAsync();//листает вниз                
-                InputEntry.Focus();                
-                var allMessages = currentChat.Messages.ToList();//Копирует историю + текущее сообщение
-                var aiText = await SendToLLMAsync(currentChat, allMessages);//отправка копии
-                var aiMessage = new Message { Sender = "ai", Text = aiText, Timestamp = DateTime.Now };//добавление aiMessage в историю
-                currentChat.Messages.Add(aiMessage);
-                RenderMessages();
-                await ScrollMessagesToEndAsync();// листает вниз
-                await ChatStorageService.SaveChatsAsync(allChats);
-                ChatStatusLabel.Text = "Готов";
+                _=StartTypingStatusAsync();
+                InputEntry.Focus();
+
+                _ = Task.Run(async () =>
+                {
+                    var allMessages = currentChat.Messages.ToList();//Копирует историю + текущее сообщение
+                    var aiText = await SendToLLMAsync(currentChat, allMessages);//отправка копии
+                    var aiMessage = new Message
+                    {
+                        Sender = "ai",
+                        Text = aiText,
+                        Timestamp = DateTime.Now,
+                        Status = MessageStatus.Done
+                    };//добавление aiMessage в историю
+                    currentChat.Messages.Add(aiMessage);
+
+                    userMessage.Status = MessageStatus.Done;
+
+                    await ChatStorageService.SaveChatsAsync(allChats);
+
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        RenderMessages();
+                        ScrollMessagesToEndAsync();// листает вниз
+                        StopTypingStatus();
+                    });
+                });
             }
             finally
             {
@@ -84,6 +136,7 @@ namespace HomeGPT_Messenger
             {
                 using var client = new HttpClient();
                 client.Timeout = TimeSpan.FromMinutes(5);//ждет ответа модели 5 минут
+
                 var messagesForLLM = messages.Select(mbox => new
                 {
                     role = mbox.Sender == "user" ? "user" : "assistant",
@@ -98,12 +151,14 @@ namespace HomeGPT_Messenger
                     stream = false,
                     messages = messagesForLLM
                 };
-                var jsonReq = JsonSerializer.Serialize(reqObj, new JsonSerializerOptions()//тест уходящей инфы
-                {
-                    WriteIndented = true,
-                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-                });
-                await DisplayAlert("Отправляймые", jsonReq, "OK");
+
+                //var jsonReq = JsonSerializer.Serialize(reqObj, new JsonSerializerOptions()//тест уходящей инфы
+                //{
+                //    WriteIndented = true,
+                //    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                //});
+                //await DisplayAlert("Отправляймые", jsonReq, "OK");
+
                 var response = await client.PostAsJsonAsync(OLLAMA_URL, reqObj);
                 response.EnsureSuccessStatusCode();
 
@@ -111,9 +166,7 @@ namespace HomeGPT_Messenger
                 return json?.message?.content ?? "(No response)";
             }
             catch (Exception ex) { return $"[Error:{ex.Message}]"; }
-
         }
-
 
         public class OllamaResponse
         {
@@ -169,7 +222,7 @@ namespace HomeGPT_Messenger
             MessagesLayout.Children.Add(ChatBottomAnchor);
         }
 
-        #region
+        #region InputEntry (Проверка пустоты)
         private void InputEntry_TextChanged(object sender, EventArgs e)
         {
             if (isWaiting) return;
@@ -178,11 +231,26 @@ namespace HomeGPT_Messenger
         }
         #endregion
 
-        #region Scroll (Листает вниз)
-        protected override void OnAppearing()
+        #region Appearing ( Scroll Листает вниз)+ ChatStorage+ Status Chat
+        protected override async void OnAppearing()
         {
             base.OnAppearing();
+            allChats = await ChatStorageService.LoadChatsAsync();
+            var updatedChat= allChats.FirstOrDefault(c=>c.Id==currentChat.Id);
+            if (updatedChat != null) currentChat = updatedChat;
+            RenderMessages();
             _ = ScrollMessagesToEndAsync();
+
+            var lastMsg = currentChat.Messages.LastOrDefault();
+            if (lastMsg != null && lastMsg.Sender == "user" &&
+                (currentChat.Messages.Count == 1 || currentChat.Messages.Last().Sender == "user"))
+            {
+                _=StartTypingStatusAsync();
+            }
+            else
+            {
+                StopTypingStatus();
+            }
         }
 
         private async Task ScrollMessagesToEndAsync()
@@ -202,7 +270,7 @@ namespace HomeGPT_Messenger
         }
         #endregion
 
-        #region Overlay (Для меню)
+        #region Overlay (Для меню) 
         private void OnMenuOverlayTapped(object sender, EventArgs e)
         {
             SideMenu.IsVisible = false;
