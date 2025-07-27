@@ -3,6 +3,7 @@ using HomeGPT_Messenger.Pages;
 using HomeGPT_Messenger.Services;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Maui.Controls;
 
 
 namespace HomeGPT_Messenger
@@ -37,15 +38,16 @@ namespace HomeGPT_Messenger
 
         private async void OnSendClicked(object sender, EventArgs e)
         {
+            if(isWaiting) return;
+            isWaiting=true;
+            SendButton.IsEnabled = false;
+            SendButton.Opacity = 0.5;
             try
             {
                 ChatStatusLabel.Text = "Ожидайте ответа.....";
                 var userText = InputEntry.Text?.Trim();
                 if (string.IsNullOrWhiteSpace(userText))
                 {
-                    SendButton.IsEnabled = true;
-                    SendButton.Opacity = 1;
-                    isWaiting = false;
                     InputEntry.Text = string.Empty;
                     ChatStatusLabel.Text = "Готов";
                     return;
@@ -54,8 +56,8 @@ namespace HomeGPT_Messenger
                 var userMessage = new Message { Sender = "user", Text = userText, Timestamp = DateTime.Now };//Собирает сообщение пользователя
                 currentChat.Messages.Add(userMessage);
                 RenderMessages();
-                await ScrollMessagesToEndAsync();//листает вниз
                 InputEntry.Text = string.Empty;
+                await ScrollMessagesToEndAsync();//листает вниз                
                 InputEntry.Focus();                
                 var allMessages = currentChat.Messages.ToList();//Копирует историю + текущее сообщение
                 var aiText = await SendToLLMAsync(currentChat, allMessages);//отправка копии
@@ -68,8 +70,8 @@ namespace HomeGPT_Messenger
             }
             finally
             {
-                SendButton.IsEnabled = true;
-                SendButton.Opacity = 1;
+                SendButton.IsEnabled = !string.IsNullOrWhiteSpace(InputEntry.Text);
+                SendButton.Opacity = SendButton.IsEnabled ? 1.0 : 0.5;
                 isWaiting = false;
             }
             
@@ -78,11 +80,6 @@ namespace HomeGPT_Messenger
         private bool isWaiting = false;
         private async Task<string> SendToLLMAsync(Chat chat,List<Message> messages)
         {
-            if (isWaiting) return string.Empty;
-            isWaiting = true;
-            SendButton.IsEnabled=false;
-            SendButton.Opacity = 0.5;
-
             try
             {
                 using var client = new HttpClient();
@@ -101,12 +98,12 @@ namespace HomeGPT_Messenger
                     stream = false,
                     messages = messagesForLLM
                 };
-                //var jsonReq = JsonSerializer.Serialize(reqObj, new JsonSerializerOptions()//тест уходящей инфы
-                //{
-                //    WriteIndented = true,
-                //    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-                //});                
-                //await DisplayAlert("Отправляймые", jsonReq, "OK");
+                var jsonReq = JsonSerializer.Serialize(reqObj, new JsonSerializerOptions()//тест уходящей инфы
+                {
+                    WriteIndented = true,
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                });
+                await DisplayAlert("Отправляймые", jsonReq, "OK");
                 var response = await client.PostAsJsonAsync(OLLAMA_URL, reqObj);
                 response.EnsureSuccessStatusCode();
 
@@ -131,7 +128,7 @@ namespace HomeGPT_Messenger
         private void RenderMessages()
         {
             MessagesLayout.Children.Clear();
-            foreach(var msg in currentChat.Messages)
+            foreach (var msg in currentChat.Messages)
             {
                 var textLabel = new Label
                 {
@@ -161,15 +158,25 @@ namespace HomeGPT_Messenger
                     : (Color)Application.Current.Resources["MessageBubbleAI"],
                     CornerRadius = 16,
                     Padding = 10,
-                    Margin = new Thickness(10,5),
+                    Margin = new Thickness(10, 5),
                     HasShadow = false,
                     HorizontalOptions = msg.Sender == "user" ? LayoutOptions.End : LayoutOptions.Start,
-                    Content =stack,
-                    MaximumWidthRequest=700
+                    Content = stack,
+                    MaximumWidthRequest = 700
                 };
                 MessagesLayout.Children.Add(frame);
             }
+            MessagesLayout.Children.Add(ChatBottomAnchor);
         }
+
+        #region
+        private void InputEntry_TextChanged(object sender, EventArgs e)
+        {
+            if (isWaiting) return;
+            SendButton.IsEnabled=!string.IsNullOrWhiteSpace(InputEntry.Text);
+            SendButton.Opacity = SendButton.IsEnabled ? 1.0 : 0.5;
+        }
+        #endregion
 
         #region Scroll (Листает вниз)
         protected override void OnAppearing()
@@ -180,8 +187,18 @@ namespace HomeGPT_Messenger
 
         private async Task ScrollMessagesToEndAsync()
         {
-            await Task.Delay(50);//Время для отрисовки
-            await MessagesScrollView.ScrollToAsync(0, MessagesLayout.Height, true);
+            Device.BeginInvokeOnMainThread(async() =>
+            {
+                await Task.Delay(100);
+                if (MessagesLayout.Children.Contains(ChatBottomAnchor))
+                {
+                    try
+                    {
+                        MessagesScrollView.ScrollToAsync(ChatBottomAnchor, ScrollToPosition.End, true);
+                    }
+                    catch { }
+                }
+            });
         }
         #endregion
 

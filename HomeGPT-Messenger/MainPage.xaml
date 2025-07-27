@@ -16,7 +16,9 @@
             </Grid>
 
             <ScrollView x:Name="MessagesScrollView" Grid.Row="1" Margin="0,0,0,0">
-                <VerticalStackLayout x:Name="MessagesLayout" Spacing="8" Padding="10"/>
+                <VerticalStackLayout x:Name="MessagesLayout" Spacing="8" Padding="10">
+                    <BoxView x:Name="ChatBottomAnchor" HeightRequest="1"/>
+                </VerticalStackLayout>
             </ScrollView>
 
             <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Padding="10" BackgroundColor="{DynamicResource InputBackground}">
