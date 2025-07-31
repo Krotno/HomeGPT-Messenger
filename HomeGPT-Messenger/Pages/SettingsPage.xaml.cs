@@ -33,19 +33,32 @@ public partial class SettingsPage : ContentPage
     }
     #endregion
 
-    private void ThemeSwitchToggled(object sender, ToggledEventArgs e)
+    private async void OnThemeButtonClicked(object sender, EventArgs e)
     {
-        try
+        string result = await DisplayActionSheet("Выберите тему", "Отмена", null,"Системная","Светлая","Тёмная");
+        if (result == null || result == "Отмена") return;
+        if (Application.Current is App app)
         {
-            if (Application.Current is App app)
+            if (result == "Системная")
             {
-                app.SetThem(e.Value);
+                Preferences.Set("theme", "system");
+                var isDark = Application.Current.RequestedTheme == AppTheme.Dark;
+                app.SetThem(isDark);
+                ThemeButton.Text = "Тема:Системная";
+
             }
-            ThemeLabel.Text = e.Value ? "Темная" : "Светлая";
-        }
-        catch (Exception ex)
-        {
-            DisplayAlert("Ошибка просим обратиться в поддержку", ex.Message, "ОК");
-        }        
+            else if (result == "Светлая")
+            {
+                Preferences.Set("theme", "light");
+                app.SetThem(false);
+                ThemeButton.Text = "Тема:Светлая";
+            }
+            else if (result == "Тёмная")
+            {
+                Preferences.Set("theme", "dark");
+                app.SetThem(true);
+                ThemeButton.Text = "Тема:Тёмная";
+            }
+        } 
     }
 }

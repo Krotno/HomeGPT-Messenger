@@ -13,10 +13,10 @@
         </Grid>
 
         <HorizontalStackLayout Grid.Row="1" Padding="20" Spacing="16" VerticalOptions="Start">
-            <Label x:Name="ThemeLabel" Text="Светлая" FontSize="18"
-                   VerticalOptions="Center" TextColor="{DynamicResource TextColor}"/>
-            <Switch x:Name="ThemeSwitch" Toggled="ThemeSwitchToggled"
-                    ThumbColor="{DynamicResource ButtonBackground}" OnColor="{DynamicResource ButtonBackground}"/>
+            <Button Text="Тема: Системная" Clicked="OnThemeButtonClicked"
+                    BackgroundColor="{DynamicResource ButtonBackground}"
+                    TextColor="{DynamicResource ButtonTextColor}" x:Name="ThemeButton"
+                    CornerRadius="18" HeightRequest="48" Margin="0,20,0,0"/>
         </HorizontalStackLayout>
 
         <BoxView Grid.RowSpan="3" x:Name="MenuOverlay" IsVisible="{Binding Source={x:Reference SideMenu}, Path=IsVisible}"
