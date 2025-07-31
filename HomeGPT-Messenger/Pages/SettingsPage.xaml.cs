@@ -32,4 +32,13 @@ public partial class SettingsPage : ContentPage
         await Navigation.PushAsync(new SettingsPage());
     }
     #endregion
+
+    private void ThemeSwitchToggled(object sender, ToggledEventArgs e)
+    {
+        if (Application.Current is App app)
+        {
+            app.SetThem(e.Value);
+        }
+        ThemeLabel.Text = e.Value ? "Темная" : "Светлая";
+    }
 }

@@ -2,9 +2,15 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="HomeGPT_Messenger.Themes.Light">
-    <Color x:Key="BackgroundColor">#FAFAFA</Color>
-    <Color x:Key="MessageBubbleUser">#E3F6FF</Color>
-    <Color x:Key="MessageBubbleAI">#EAEAEA</Color>
-    <Color x:Key="TextColor">#222</Color>
+    <Color x:Key="BackgroundColor">#F9FAFB</Color>
     <Color x:Key="InputBackground">#FFFFFF</Color>
+    <Color x:Key="TextColor">#1E293B</Color>
+    <Color x:Key="MessageBubbleUser">#E0F2FE</Color>
+    <Color x:Key="MessageBubbleAI">#F3F4F6</Color>
+    <Color x:Key="MessageTextColor">#23272F</Color>
+    <Color x:Key="ButtonBackground">#2196F3</Color>
+    <Color x:Key="ButtonTextColor">#FFFFFF</Color>
+    <Color x:Key="MenuBackground">#DDFFFFFF</Color>
+    <Color x:Key="MenuOverlayColor">#88000000</Color>
+    <Color x:Key="TimeColor">#969CA2</Color>
 </ResourceDictionary>

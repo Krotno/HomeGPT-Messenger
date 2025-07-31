@@ -1,33 +1,41 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             BackgroundColor="{DynamicResource BackgroundColor}"
              x:Class="HomeGPT_Messenger.Pages.SettingsPage">
-    <Grid>
-        <VerticalStackLayout>
-            
-            <Grid HeightRequest="48">
-                <Button Grid.Column="0" Text="☰" Margin="0,16,0,0" Clicked="OnMenuButtonClicked" HorizontalOptions="Start"/>
-                <Label Text="Настройки" FontAttributes="Bold" FontSize="24"
-               VerticalOptions="Center" HorizontalOptions="Center"/>
-            </Grid>
-            
-        </VerticalStackLayout>
-        
-        <BoxView x:Name="MenuOverlay" IsVisible="{Binding Source={x:Reference SideMenu}, Path=IsVisible}"
-         BackgroundColor="#88000000" InputTransparent="False">
+    <Grid RowDefinitions="48,auto,*,auto">
+
+        <Grid Grid.Row="0" ColumnDefinitions="48,*" HeightRequest="48">
+            <Button Grid.Column="0" Text="☰" Margin="0,16,0,0" Clicked="OnMenuButtonClicked" HorizontalOptions="Start"  
+                        BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
+            <Label Grid.Column="1" Text="Настройки" FontAttributes="Bold" FontSize="24" VerticalOptions="Center"
+                       HorizontalOptions="Center" TextColor="{DynamicResource TextColor}"/>
+        </Grid>
+
+        <HorizontalStackLayout Grid.Row="1" Padding="20" Spacing="16" VerticalOptions="Start">
+            <Label x:Name="ThemeLabel" Text="Светлая" FontSize="18"
+                   VerticalOptions="Center" TextColor="{DynamicResource TextColor}"/>
+            <Switch x:Name="ThemeSwitch" Toggled="ThemeSwitchToggled"
+                    ThumbColor="{DynamicResource ButtonBackground}" OnColor="{DynamicResource ButtonBackground}"/>
+        </HorizontalStackLayout>
+
+        <BoxView Grid.RowSpan="3" x:Name="MenuOverlay" IsVisible="{Binding Source={x:Reference SideMenu}, Path=IsVisible}"
+         BackgroundColor="{DynamicResource MenuOverlayColor}" InputTransparent="False">
             
             <BoxView.GestureRecognizers>
                 <TapGestureRecognizer Tapped="OnMenuOverlayTapped"/>
             </BoxView.GestureRecognizers>
             
         </BoxView>
-        
-        <Grid x:Name="SideMenu" IsVisible="False" BackgroundColor="#DDFFFFFF"
+
+        <Grid Grid.RowSpan="3" x:Name="SideMenu" IsVisible="False" BackgroundColor="{DynamicResource MenuBackground}"
                 WidthRequest="200" VerticalOptions="Fill" HorizontalOptions="Start">
             
             <VerticalStackLayout Padding="16,32">
-                <Button Text="Чаты" Clicked="OnChatsClicked"/>
-                <Button Text="Настройки" Clicked="OnSettingsClicked"/>
+                <Button Text="Чаты" Clicked="OnChatsClicked" 
+                        BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
+                <Button Text="Настройки" Clicked="OnSettingsClicked" 
+                        BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
             </VerticalStackLayout>
             
         </Grid>

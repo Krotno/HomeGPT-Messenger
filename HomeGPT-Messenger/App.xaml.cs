@@ -8,22 +8,21 @@ namespace HomeGPT_Messenger
         {
             InitializeComponent();
 
-            //MainPage = new MainPage();
             MainPage = new NavigationPage(new ChatsPage());
         }
 
-        public void SetThem(String theme)
+        public void SetThem(bool dark)
         {
             Resources.MergedDictionaries.Clear();
-            if (theme != null)
+            if (dark)
+            {
                 Resources.MergedDictionaries.Add(new Themes.Dark());
+            }
             else
+            {
                 Resources.MergedDictionaries.Add(new Themes.Light());
+            }
+ 
         }
-
-        //protected override Window CreateWindow(IActivationState? activationState)
-        //{
-        //    return new Window(new AppShell());
-        //}
     }
 }

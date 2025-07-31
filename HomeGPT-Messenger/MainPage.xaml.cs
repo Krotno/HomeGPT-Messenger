@@ -137,13 +137,11 @@ namespace HomeGPT_Messenger
                 using var client = new HttpClient();
                 client.Timeout = TimeSpan.FromMinutes(5);//ждет ответа модели 5 минут
 
-                var messagesForLLM = messages.Select(mbox => new
+                var messagesForLLM = messages.TakeLast(20).Select(mbox => new//Отправляет 20 сообщений за раз
                 {
                     role = mbox.Sender == "user" ? "user" : "assistant",
                     content = mbox.Text
                 }).ToList();
-
-                //currentChat.Messages.TakeLast(20).Select(mbox => new // В дальнейшем для ограничения количества запросов на 20
 
                 var reqObj = new
                 {
