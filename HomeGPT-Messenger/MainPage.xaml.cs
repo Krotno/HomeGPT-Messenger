@@ -30,26 +30,32 @@ namespace HomeGPT_Messenger
             NavigationPage.SetHasBackButton(this, false);
             ChatNameLabel.Text = currentChat.Name??"Чат";
             ChatStatusLabel.Text = "Готов";
-            
         }
 
         #region Animation(Анимации Ассистент)
         private async Task StartTypingStatusAsync()
         {
-            _typingStatusCts?.Cancel();
-            _typingStatusCts=new CancellationTokenSource();
-            var token=_typingStatusCts.Token;
-            string baseText = "Ассистент генерирует ответ";
-            int maxDots = 5;
-            int dots = 0;
-            while (!token.IsCancellationRequested)
+            try
             {
-                dots = (dots + 1) % (maxDots + 1);
-                Device.BeginInvokeOnMainThread(() =>
+                _typingStatusCts?.Cancel();
+                _typingStatusCts = new CancellationTokenSource();
+                var token = _typingStatusCts.Token;
+                string baseText = "Ассистент генерирует ответ";
+                int maxDots = 5;
+                int dots = 0;
+                while (!token.IsCancellationRequested)
                 {
-                    ChatStatusLabel.Text = baseText + new string('.', dots);
-                });                
-                await Task.Delay(400, token);
+                    dots = (dots + 1) % (maxDots + 1);
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        ChatStatusLabel.Text = baseText + new string('.', dots);
+                    });
+                    await Task.Delay(400, token);
+                }
+            }
+            catch(Exception ex)
+            {
+                await DisplayAlert("Ошибка просим обратиться в поддержку", ex.Message, "ОК");
             }
         }
 
@@ -81,18 +87,19 @@ namespace HomeGPT_Messenger
                     return;
                 }
 
-                var userMessage = new Message 
-                { Sender = "user",
-                  Text = userText,
-                  Timestamp = DateTime.Now,
-                  Status = MessageStatus.WaitingForResponse//Прикрутка в будущем статуса
+                var userMessage = new Message
+                {
+                    Sender = "user",
+                    Text = userText,
+                    Timestamp = DateTime.Now,
+                    Status = MessageStatus.WaitingForResponse//Прикрутка в будущем статуса
                 };//Собирает сообщение пользователя
                 currentChat.Messages.Add(userMessage);
                 await ChatStorageService.SaveChatsAsync(allChats);
-                RenderMessages(); 
+                RenderMessages();
                 InputEntry.Text = string.Empty;
                 await ScrollMessagesToEndAsync();//листает вниз                
-                _=StartTypingStatusAsync();
+                _ = StartTypingStatusAsync();
                 InputEntry.Focus();
 
                 _ = Task.Run(async () =>
@@ -119,6 +126,10 @@ namespace HomeGPT_Messenger
                         StopTypingStatus();
                     });
                 });
+            }
+            catch(Exception ex)
+            {
+                await DisplayAlert("Ошибка просим обратиться в поддержку", ex.Message, "ОК");
             }
             finally
             {
@@ -176,48 +187,55 @@ namespace HomeGPT_Messenger
             }
         }
 
-        private void RenderMessages()
+        private async Task RenderMessages()
         {
-            MessagesLayout.Children.Clear();
-            foreach (var msg in currentChat.Messages)
+            try
             {
-                var textLabel = new Label
+                MessagesLayout.Children.Clear();
+                foreach (var msg in currentChat.Messages)
                 {
-                    Text = msg.Text,
-                    TextColor = (Color)Application.Current.Resources["TextColor"],
-                    FontSize = 16
-                };
+                    var textLabel = new Label
+                    {
+                        Text = msg.Text,
+                        TextColor = (Color)Application.Current.Resources["TextColor"],
+                        FontSize = 16
+                    };
 
-                var timeLabel = new Label
-                {
-                    Text = msg.Timestamp.ToString("HH:mm"),
-                    TextColor = Colors.Gray,
-                    FontSize = 10,
-                    HorizontalOptions = LayoutOptions.End
-                };
+                    var timeLabel = new Label
+                    {
+                        Text = msg.Timestamp.ToString("HH:mm"),
+                        TextColor = Colors.Gray,
+                        FontSize = 10,
+                        HorizontalOptions = LayoutOptions.End
+                    };
 
-                var stack = new VerticalStackLayout
-                {
-                    Spacing = 2,
-                    Children = { textLabel, timeLabel }
-                };
+                    var stack = new VerticalStackLayout
+                    {
+                        Spacing = 2,
+                        Children = { textLabel, timeLabel }
+                    };
 
-                var frame = new Frame
-                {
-                    BackgroundColor = msg.Sender == "user"
-                    ? (Color)Application.Current.Resources["MessageBubbleUser"]
-                    : (Color)Application.Current.Resources["MessageBubbleAI"],
-                    CornerRadius = 16,
-                    Padding = 10,
-                    Margin = new Thickness(10, 5),
-                    HasShadow = false,
-                    HorizontalOptions = msg.Sender == "user" ? LayoutOptions.End : LayoutOptions.Start,
-                    Content = stack,
-                    MaximumWidthRequest = 700
-                };
-                MessagesLayout.Children.Add(frame);
+                    var frame = new Frame
+                    {
+                        BackgroundColor = msg.Sender == "user"
+                        ? (Color)Application.Current.Resources["MessageBubbleUser"]
+                        : (Color)Application.Current.Resources["MessageBubbleAI"],
+                        CornerRadius = 16,
+                        Padding = 10,
+                        Margin = new Thickness(10, 5),
+                        HasShadow = false,
+                        HorizontalOptions = msg.Sender == "user" ? LayoutOptions.End : LayoutOptions.Start,
+                        Content = stack,
+                        MaximumWidthRequest = 700
+                    };
+                    MessagesLayout.Children.Add(frame);
+                }
+                MessagesLayout.Children.Add(ChatBottomAnchor);
             }
-            MessagesLayout.Children.Add(ChatBottomAnchor);
+            catch(Exception ex)
+            {
+                await DisplayAlert("Ошибка просим обратиться в поддержку",ex.Message,"ОК");
+            }
         }
 
         #region InputEntry (Проверка пустоты)
@@ -232,22 +250,29 @@ namespace HomeGPT_Messenger
         #region Appearing ( Scroll Листает вниз)+ ChatStorage+ Status Chat
         protected override async void OnAppearing()
         {
-            base.OnAppearing();
-            allChats = await ChatStorageService.LoadChatsAsync();
-            var updatedChat= allChats.FirstOrDefault(c=>c.Id==currentChat.Id);
-            if (updatedChat != null) currentChat = updatedChat;
-            RenderMessages();
-            _ = ScrollMessagesToEndAsync();
+            try
+            {
+                base.OnAppearing();
+                allChats = await ChatStorageService.LoadChatsAsync();
+                var updatedChat = allChats.FirstOrDefault(c => c.Id == currentChat.Id);
+                if (updatedChat != null) currentChat = updatedChat;
+                RenderMessages();
+                _ = ScrollMessagesToEndAsync();
 
-            var lastMsg = currentChat.Messages.LastOrDefault();
-            if (lastMsg != null && lastMsg.Sender == "user" &&
-                (currentChat.Messages.Count == 1 || currentChat.Messages.Last().Sender == "user"))
-            {
-                _=StartTypingStatusAsync();
+                var lastMsg = currentChat.Messages.LastOrDefault();
+                if (lastMsg != null && lastMsg.Sender == "user" &&
+                    (currentChat.Messages.Count == 1 || currentChat.Messages.Last().Sender == "user"))
+                {
+                    _ = StartTypingStatusAsync();
+                }
+                else
+                {
+                    StopTypingStatus();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                StopTypingStatus();
+                await DisplayAlert("Ошибка просим обратиться в поддержку", ex.Message, "ОК");
             }
         }
 
@@ -262,7 +287,10 @@ namespace HomeGPT_Messenger
                     {
                         MessagesScrollView.ScrollToAsync(ChatBottomAnchor, ScrollToPosition.End, true);
                     }
-                    catch { }
+                    catch(Exception ex) 
+                    { 
+                        await DisplayAlert("Ошибка просим обратиться в поддержку", ex.Message, "ОК"); 
+                    }
                 }
             });
         }

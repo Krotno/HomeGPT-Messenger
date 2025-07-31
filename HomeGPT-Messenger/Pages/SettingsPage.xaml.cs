@@ -35,10 +35,17 @@ public partial class SettingsPage : ContentPage
 
     private void ThemeSwitchToggled(object sender, ToggledEventArgs e)
     {
-        if (Application.Current is App app)
+        try
         {
-            app.SetThem(e.Value);
+            if (Application.Current is App app)
+            {
+                app.SetThem(e.Value);
+            }
+            ThemeLabel.Text = e.Value ? "Темная" : "Светлая";
         }
-        ThemeLabel.Text = e.Value ? "Темная" : "Светлая";
+        catch (Exception ex)
+        {
+            DisplayAlert("Ошибка просим обратиться в поддержку", ex.Message, "ОК");
+        }        
     }
 }
