@@ -30,6 +30,8 @@ namespace HomeGPT_Messenger
             NavigationPage.SetHasBackButton(this, false);
             ChatNameLabel.Text = currentChat.Name??"Чат";
             ChatStatusLabel.Text = "Готов";
+            SendButton.IsEnabled = false;
+            SendButton.Opacity = 0.5;
         }
 
         #region Animation(Анимации Ассистент)
@@ -53,7 +55,11 @@ namespace HomeGPT_Messenger
                     await Task.Delay(400, token);
                 }
             }
-            catch(Exception ex)
+            catch(TaskCanceledException)
+            {
+                //Ловим ошибку при ответе LLM 
+            }
+            catch (Exception ex)
             {
                 await DisplayAlert("Ошибка просим обратиться в поддержку", ex.Message, "ОК");
             }
@@ -104,40 +110,61 @@ namespace HomeGPT_Messenger
 
                 _ = Task.Run(async () =>
                 {
-                    var allMessages = currentChat.Messages.ToList();//Копирует историю + текущее сообщение
-                    var aiText = await SendToLLMAsync(currentChat, allMessages);//отправка копии
-                    var aiMessage = new Message
+                    try
                     {
-                        Sender = "ai",
-                        Text = aiText,
-                        Timestamp = DateTime.Now,
-                        Status = MessageStatus.Done
-                    };//добавление aiMessage в историю
-                    currentChat.Messages.Add(aiMessage);
+                        var allMessages = currentChat.Messages.ToList();//Копирует историю + текущее сообщение
+                        var aiText = await SendToLLMAsync(currentChat, allMessages);//отправка копии
+                        var aiMessage = new Message
+                        {
+                            Sender = "ai",
+                            Text = aiText,
+                            Timestamp = DateTime.Now,
+                            Status = MessageStatus.Done
+                        };//добавление aiMessage в историю
+                        currentChat.Messages.Add(aiMessage);
 
-                    userMessage.Status = MessageStatus.Done;
+                        userMessage.Status = MessageStatus.Done;
 
-                    await ChatStorageService.SaveChatsAsync(allChats);
+                        await ChatStorageService.SaveChatsAsync(allChats);
 
-                    Device.BeginInvokeOnMainThread(() =>
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            RenderMessages();
+                            ScrollMessagesToEndAsync();// листает вниз
+                            StopTypingStatus();
+                        });
+                    }
+                    catch (TaskCanceledException)
                     {
-                        RenderMessages();
-                        ScrollMessagesToEndAsync();// листает вниз
-                        StopTypingStatus();
-                    });
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            StopTypingStatus();
+                            DisplayAlert("Ошибка просим обратиться в поддержку", "Запрос был отменен", "ОК");
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            StopTypingStatus();
+                            DisplayAlert("Ошибка просим обратиться в поддержку", ex.Message, "ОК");
+                        });
+                    }
+                    finally
+                    {
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            isWaiting = false;
+                            SendButton.IsEnabled = !string.IsNullOrWhiteSpace(InputEntry.Text) && !isWaiting;
+                            SendButton.Opacity = SendButton.IsEnabled ? 1.0 : 0.5;
+                        });
+                    }
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await DisplayAlert("Ошибка просим обратиться в поддержку", ex.Message, "ОК");
-            }
-            finally
-            {
-                SendButton.IsEnabled = !string.IsNullOrWhiteSpace(InputEntry.Text);
-                SendButton.Opacity = SendButton.IsEnabled ? 1.0 : 0.5;
-                isWaiting = false;
-            }
-            
+            }            
         }
 
         private bool isWaiting = false;
@@ -241,8 +268,7 @@ namespace HomeGPT_Messenger
         #region InputEntry (Проверка пустоты)
         private void InputEntry_TextChanged(object sender, EventArgs e)
         {
-            if (isWaiting) return;
-            SendButton.IsEnabled=!string.IsNullOrWhiteSpace(InputEntry.Text);
+            SendButton.IsEnabled = !string.IsNullOrWhiteSpace(InputEntry.Text) && !isWaiting;
             SendButton.Opacity = SendButton.IsEnabled ? 1.0 : 0.5;
         }
         #endregion
