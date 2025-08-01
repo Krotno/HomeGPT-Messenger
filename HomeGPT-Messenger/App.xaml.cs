@@ -20,6 +20,7 @@ namespace HomeGPT_Messenger
                 var isDark=Application.Current.RequestedTheme==AppTheme.Dark;
                 SetThem(isDark);  
             }
+            Application.Current.RequestedThemeChanged += OnSystemThemeChange;
             MainPage = new NavigationPage(new ChatsPage());
         }
 
@@ -34,16 +35,18 @@ namespace HomeGPT_Messenger
             {
                 Resources.MergedDictionaries.Add(new Themes.Light());
             }
-            //Resources.MergedDictionaries.Clear();
-            //if (dark)
-            //{
-            //    Resources.MergedDictionaries.Add(new Themes.Dark());
-            //}
-            //else
-            //{
-            //    Resources.MergedDictionaries.Add(new Themes.Light());
-            //}
 
+        }
+
+        private void OnSystemThemeChange(object sender, AppThemeChangedEventArgs e)
+        {
+            if (Preferences.Get("theme", "system") == "system")
+            {
+                bool isDark=e.RequestedTheme==AppTheme.Dark;
+                SetThem(isDark);
+
+                MessagingCenter.Send(this, "ThemeChanged", isDark ? "Тёмная" : "Светлая");
+            }
         }
     }
 }

@@ -6,6 +6,11 @@ public partial class SettingsPage : ContentPage
     {
         InitializeComponent();
         NavigationPage.SetHasBackButton(this, false);
+        MessagingCenter.Subscribe<App, string>(this, "", (app, mode) =>
+        {
+            ThemeButton.Text = $"Тема: Системная ({mode})";
+        });
+        UpdateThemeButtonText();
     }
     #region Overlay (для меню)
     private void OnMenuOverlayTapped(object sender, EventArgs e)
@@ -59,6 +64,23 @@ public partial class SettingsPage : ContentPage
                 app.SetThem(true);
                 ThemeButton.Text = "Тема:Тёмная";
             }
+            UpdateThemeButtonText();
         } 
+    }
+
+    private void UpdateThemeButtonText()
+    {
+        string pref = Preferences.Get("theme", "system");
+        if (pref == "system")
+        {
+            var mode = Application.Current.RequestedTheme == AppTheme.Dark ? "Тёмная" : "Светлая";
+            ThemeButton.Text = $"Тема: Системная({mode})";
+        }else if (pref == "light")
+        {
+            ThemeButton.Text = "Тема: Светлая";
+        }else if (pref == "dark")
+        {
+            ThemeButton.Text = "Тема: Тёмная";
+        }
     }
 }
