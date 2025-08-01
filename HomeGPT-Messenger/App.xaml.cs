@@ -23,7 +23,7 @@ namespace HomeGPT_Messenger
             Application.Current.RequestedThemeChanged += OnSystemThemeChange;
             MainPage = new NavigationPage(new ChatsPage());
         }
-
+        #region Theme(Системная/Тёмная/Светлая)
         public void SetThem(bool dark)
         {
 
@@ -47,6 +47,20 @@ namespace HomeGPT_Messenger
 
                 MessagingCenter.Send(this, "ThemeChanged", isDark ? "Тёмная" : "Светлая");
             }
+        }
+        #endregion
+
+        public void ApplyFontSizeSetting()
+        {
+            var fontPref = Preferences.Get("fontSize", "system");
+            double size = fontPref switch
+            {
+                "small" => 12,
+                "medium" => 16,
+                "large" => 20,
+                _ => Device.GetNamedSize(NamedSize.Default, typeof(Label))
+            };
+            Application.Current.Resources["AppFontSize"] = size;
         }
     }
 }

@@ -8,6 +8,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Themes/Light.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <x:Double x:Key="AppFontSize">16</x:Double>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

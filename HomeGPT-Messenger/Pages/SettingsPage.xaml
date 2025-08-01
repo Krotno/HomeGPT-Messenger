@@ -3,10 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              BackgroundColor="{DynamicResource BackgroundColor}"
              x:Class="HomeGPT_Messenger.Pages.SettingsPage">
-    <Grid RowDefinitions="48,auto,*,auto">
+    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto"> 
 
         <Grid Grid.Row="0" ColumnDefinitions="48,*" HeightRequest="48">
-            <Button Grid.Column="0" Text="☰" Margin="0,16,0,0" Clicked="OnMenuButtonClicked" HorizontalOptions="Start"  
+            <Button Grid.Column="0" Text="☰" Margin="0,16,0,0" Clicked="OnMenuButtonClicked" HorizontalOptions="Start" FontSize="{DynamicResource AppFontSize}" 
                         BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
             <Label Grid.Column="1" Text="Настройки" FontAttributes="Bold" FontSize="24" VerticalOptions="Center"
                        HorizontalOptions="Center" TextColor="{DynamicResource TextColor}"/>
@@ -16,10 +16,55 @@
             <Button Text="Тема: Системная" Clicked="OnThemeButtonClicked"
                     BackgroundColor="{DynamicResource ButtonBackground}"
                     TextColor="{DynamicResource ButtonTextColor}" x:Name="ThemeButton"
-                    CornerRadius="18" HeightRequest="48" Margin="0,20,0,0"/>
+                    CornerRadius="18" HeightRequest="48" Margin="0,20,0,0" 
+                    FontSize="{DynamicResource AppFontSize}"/>
         </HorizontalStackLayout>
 
-        <BoxView Grid.RowSpan="3" x:Name="MenuOverlay" IsVisible="{Binding Source={x:Reference SideMenu}, Path=IsVisible}"
+        <VerticalStackLayout Grid.Row="2" Padding="20,8,20,0" Spacing="8">
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Размер текста" LineBreakMode="TailTruncation" TextColor="{DynamicResource TextColor}"
+                       FontSize="{DynamicResource AppFontSize}"/>
+
+                <Label Grid.Row="4" x:Name="CurrentFontSizeLabel" FontSize="{DynamicResource AppFontSize}" TextColor="Gray"
+                       Margin="9,0,0,0" Text="Текущий размер: Системный" LineBreakMode="TailTruncation"/>
+            </VerticalStackLayout>
+
+
+            <Frame Padding="8,4" BackgroundColor="{DynamicResource ButtonBackground}"
+                   CornerRadius="24" HasShadow="False" MaximumWidthRequest="500" HorizontalOptions="Start">
+
+                <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                    
+                    <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+
+                        <RadioButton x:Name="SmallFontRB" Content="A" FontSize="12" IsChecked="{Binding IsSmallFont,Mode=TwoWay}" CornerRadius="12" CheckedChanged="OnFontSizeChanged"
+                                     BackgroundColor="Transparent" HeightRequest="50" MinimumWidthRequest="50" TextColor="{DynamicResource TextColor}"/>
+
+                        <RadioButton x:Name="MediumFontRB" Content="A"  FontSize="16" IsChecked="{Binding IsMediumFont,Mode=TwoWay}" CornerRadius="12"  CheckedChanged="OnFontSizeChanged"
+                                     BackgroundColor="Transparent" HeightRequest="50" MinimumWidthRequest="50" TextColor="{DynamicResource TextColor}"/>
+
+                        <RadioButton x:Name="LargeFontRB" Content="A" HorizontalOptions="Center" VerticalOptions="Center" FontSize="22" IsChecked="{Binding IsLargeFont,Mode=TwoWay}" CornerRadius="12" CheckedChanged="OnFontSizeChanged" 
+                                     BackgroundColor="Transparent" HeightRequest="50" MinimumWidthRequest="50" TextColor="{DynamicResource TextColor}"/>
+
+                        <Button Text="⟳" TextColor="{DynamicResource ButtonTextColor}" x:Name="ResetFontSizeButton"
+                                HeightRequest="32" WidthRequest="32" BackgroundColor="{DynamicResource ButtonBackground}" 
+                                FontSize="{DynamicResource AppFontSize}" CornerRadius="16" Padding="0" Margin="8,0,0,0" 
+                                Clicked="OnResetFontSizeClicked" MinimumWidthRequest="25"/>
+                        
+                    </HorizontalStackLayout>
+                    
+                </ScrollView>
+                
+            </Frame>
+            
+        </VerticalStackLayout>
+
+        <BoxView Grid.Row="3"/>
+
+        
+
+        <BoxView Grid.RowSpan="6" x:Name="MenuOverlay" IsVisible="{Binding Source={x:Reference SideMenu}, Path=IsVisible}"
          BackgroundColor="{DynamicResource MenuOverlayColor}" InputTransparent="False">
             
             <BoxView.GestureRecognizers>
@@ -28,7 +73,7 @@
             
         </BoxView>
 
-        <Grid Grid.RowSpan="3" x:Name="SideMenu" IsVisible="False" BackgroundColor="{DynamicResource MenuBackground}"
+        <Grid Grid.RowSpan="6" x:Name="SideMenu" IsVisible="False" BackgroundColor="{DynamicResource MenuBackground}"
                 WidthRequest="200" VerticalOptions="Fill" HorizontalOptions="Start">
             
             <VerticalStackLayout Padding="16,32">

@@ -37,7 +37,7 @@ public partial class SettingsPage : ContentPage
         await Navigation.PushAsync(new SettingsPage());
     }
     #endregion
-
+    #region Theme(Системная/Светлая/Тёмная)
     private async void OnThemeButtonClicked(object sender, EventArgs e)
     {
         string result = await DisplayActionSheet("Выберите тему", "Отмена", null,"Системная","Светлая","Тёмная");
@@ -83,4 +83,42 @@ public partial class SettingsPage : ContentPage
             ThemeButton.Text = "Тема: Тёмная";
         }
     }
+    #endregion
+
+    private void OnFontSizeChanged(object sender, CheckedChangedEventArgs e)
+    {
+        if (!e.Value) return;
+        if (sender == SmallFontRB)
+        {
+            SetFontSize("small");
+        }else if (sender == MediumFontRB)
+        {
+            SetFontSize("medium");
+        }else if (sender == LargeFontRB)
+        {
+            SetFontSize("large");
+        }
+    }
+
+    private void OnResetFontSizeClicked(object sender, EventArgs e)
+    {
+        SetFontSize("system");
+        SmallFontRB.IsChecked=false;
+        MediumFontRB.IsChecked=false;
+        LargeFontRB.IsChecked=false;
+    }
+
+    private void SetFontSize(string mode)
+    {
+        Preferences.Set("fontSize", mode);
+        (Application.Current as App)?.ApplyFontSizeSetting();
+        CurrentFontSizeLabel.Text = "Текущий размер: " + (mode switch
+        {
+            "small" => "Маленький",
+            "medium" => "Средний",
+            "large" => "Большой",
+            _ => "Системный"
+        });
+    }
+
 }
