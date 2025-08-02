@@ -7,13 +7,13 @@
     <Grid>
         <Grid RowDefinitions="48,*,auto">
             <Grid Grid.Row="0" BackgroundColor="{DynamicResource BackgroundColor}">
-                <Button Grid.Column="0" Text="☰" Margin="0,16,0,0" Clicked="OnMenuButtonClicked" HorizontalOptions="Start"
+                <Button Grid.Column="0" Text="☰" Margin="0,16,0,0" Clicked="OnMenuButtonClicked" HorizontalOptions="Start" FontSize="{DynamicResource AppFontSize}"
                         BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
 
                 <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Center">
-                    <Label x:Name="ChatNameLabel" Text="Имя чата" FontSize="20"
+                    <Label x:Name="ChatNameLabel" Text="Имя чата" FontSize="{DynamicResource AppFontSize}"
                            TextColor="{DynamicResource TextColor}" FontAttributes="Bold" HorizontalOptions="Center"/>
-                    <Label x:Name="ChatStatusLabel" Text="Готов" FontSize="12" 
+                    <Label x:Name="ChatStatusLabel" Text="Готов" FontSize="{DynamicResource AppFontSize}"
                            TextColor="{DynamicResource TimeColor}" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
             </Grid>
@@ -30,8 +30,9 @@
                        TextColor="{DynamicResource TextColor}"
                        BackgroundColor="{DynamicResource InputBackground}"
                        Completed="InputEntry_Completed"
-                       TextChanged="InputEntry_TextChanged"/>
-                <Button Grid.Column="1" Text="Send" x:Name="SendButton" Clicked="OnSendClicked" 
+                       TextChanged="InputEntry_TextChanged"
+                       FontSize="{DynamicResource AppFontSize}"/>
+                <Button Grid.Column="1" Text="Send" x:Name="SendButton" Clicked="OnSendClicked" FontSize="{DynamicResource AppFontSize}"
                         BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
             </Grid>
         </Grid>
@@ -53,9 +54,9 @@
               Margin="0,0,0,0">
             <VerticalStackLayout Padding="16,32">
                 <Button Text="Чаты" Clicked="OnChatsClicked" BackgroundColor="{DynamicResource ButtonBackground}"
-                        TextColor="{DynamicResource ButtonTextColor}"/>
+                        TextColor="{DynamicResource ButtonTextColor}" FontSize="{DynamicResource AppFontSize}"/>
                 <Button Text="Настройки" Clicked="OnSettingsClicked" BackgroundColor="{DynamicResource ButtonBackground}" 
-                        TextColor="{DynamicResource ButtonTextColor}"/>
+                        TextColor="{DynamicResource ButtonTextColor}" FontSize="{DynamicResource AppFontSize}"/>
             </VerticalStackLayout>
         </Grid>
     </Grid>

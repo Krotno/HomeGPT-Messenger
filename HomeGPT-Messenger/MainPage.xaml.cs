@@ -225,14 +225,14 @@ namespace HomeGPT_Messenger
                     {
                         Text = msg.Text,
                         TextColor = (Color)Application.Current.Resources["TextColor"],
-                        FontSize = 16
+                        FontSize=(double)Application.Current.Resources["AppFontSize"]
                     };
 
                     var timeLabel = new Label
                     {
                         Text = msg.Timestamp.ToString("HH:mm"),
                         TextColor = Colors.Gray,
-                        FontSize = 10,
+                        FontSize = 11,
                         HorizontalOptions = LayoutOptions.End
                     };
 

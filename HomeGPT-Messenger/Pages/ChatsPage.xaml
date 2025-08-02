@@ -9,12 +9,12 @@
             
             <Grid>
                 <Button Text="☰" Clicked="OnMenuButtonClicked" HorizontalOptions="Start" BackgroundColor="{DynamicResource ButtonBackground}"
-                        TextColor="{DynamicResource ButtonTextColor}"/>
+                        TextColor="{DynamicResource ButtonTextColor}" FontSize="{DynamicResource AppFontSize}"/>
                 <Label Text="Список чатов" FontAttributes="Bold" FontSize="24" HorizontalOptions="Center" TextColor="{DynamicResource TextColor}"/>
             </Grid>
 
             <Button Text="Новый чат" Clicked="OnAddChatClicked" BackgroundColor="{DynamicResource ButtonBackground}"
-                        TextColor="{DynamicResource ButtonTextColor}"/>
+                        TextColor="{DynamicResource ButtonTextColor}" FontSize="{DynamicResource AppFontSize}"/>
             
             <CollectionView x:Name="ChatsList" SelectionMode="Single" SelectionChanged="OnChatSelected" HeightRequest="400">
                 <CollectionView.ItemTemplate>
@@ -22,9 +22,9 @@
                         <Frame Margin="0,5" Padding="10" CornerRadius="12" BackgroundColor="{DynamicResource MessageBubbleAI}">
                             
                             <Grid ColumnDefinitions="*,Auto">
-                                <Label Text="{Binding Name}" FontSize="18" 
+                                <Label Text="{Binding Name}" FontSize="{DynamicResource AppFontSize}" 
                                        VerticalOptions="Center" TextColor="{DynamicResource TextColor}"/>
-                                <Button Text="⋮" FontSize="24"
+                                <Button Text="⋮" FontSize="{DynamicResource AppFontSize}"
                                 WidthRequest="30" HeightRequest="30"
                                 CornerRadius="18" Padding="0"
                                 Margin="0" BorderWidth="1"
@@ -64,9 +64,9 @@
             
             <VerticalStackLayout Padding="16,32">
                 <Button Text="Чаты" Clicked="OnChatsClicked" BackgroundColor="{DynamicResource ButtonBackground}"
-                        TextColor="{DynamicResource ButtonTextColor}"/>
+                        TextColor="{DynamicResource ButtonTextColor}" FontSize="{DynamicResource AppFontSize}"/>
                 <Button Text="Настройки" Clicked="OnSettingsClicked" BackgroundColor="{DynamicResource ButtonBackground}"
-                        TextColor="{DynamicResource ButtonTextColor}"/>
+                        TextColor="{DynamicResource ButtonTextColor}" FontSize="{DynamicResource AppFontSize}"/>
             </VerticalStackLayout>
             
         </Grid>

@@ -1,3 +1,5 @@
+//using static ObjCRuntime.Dlfcn;
+
 namespace HomeGPT_Messenger.Pages;
 
 public partial class SettingsPage : ContentPage
@@ -11,6 +13,7 @@ public partial class SettingsPage : ContentPage
             ThemeButton.Text = $"Тема: Системная ({mode})";
         });
         UpdateThemeButtonText();
+        SetFontSize(Preferences.Get("fontSize", "system")); //для подтягивание текущих значений  
     }
     #region Overlay (для меню)
     private void OnMenuOverlayTapped(object sender, EventArgs e)
@@ -120,5 +123,21 @@ public partial class SettingsPage : ContentPage
             _ => "Системный"
         });
     }
+
+    //private void UpdateFontSizeLabel()
+    //{
+    //    string current = Preferences.Get("fontSize", "system");
+    //    CurrentFontSizeLabel.Text= "Текущий размер: " + (mode switch
+    //    {
+    //        "small" => "Маленький",
+    //        "medium" => "Средний",
+    //        "large" => "Большой",
+    //        _ => "Системный"
+    //    });
+    //    string text = current switch
+    //    {
+    //        ""=>"",
+    //    }
+    //}
 
 }
