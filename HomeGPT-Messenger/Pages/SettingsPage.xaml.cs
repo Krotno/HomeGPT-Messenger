@@ -1,5 +1,3 @@
-//using static ObjCRuntime.Dlfcn;
-
 namespace HomeGPT_Messenger.Pages;
 
 public partial class SettingsPage : ContentPage
@@ -14,6 +12,7 @@ public partial class SettingsPage : ContentPage
         });
         UpdateThemeButtonText();
         SetFontSize(Preferences.Get("fontSize", "system")); //для подтягивание текущих значений  
+        ShowTime.IsToggled = Preferences.Get("showTime", true);
     }
     #region Overlay (для меню)
     private void OnMenuOverlayTapped(object sender, EventArgs e)

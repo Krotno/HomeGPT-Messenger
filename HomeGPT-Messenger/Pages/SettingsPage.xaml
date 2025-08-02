@@ -62,7 +62,7 @@
 
                 <Label HorizontalOptions="Start" Margin="10" VerticalOptions="Center" Text="Показывать время сообщений" FontSize="{DynamicResource AppFontSize}" TextColor="{DynamicResource TextColor}"/>
 
-                <Switch HorizontalOptions="End" Margin="10" VerticalOptions="Center" IsToggled="{Binding ShowTime, Mode=TwoWay}" Toggled="OnShowTimeToggle"/>
+                <Switch x:Name="ShowTime" HorizontalOptions="End" Margin="10" VerticalOptions="Center" IsToggled="{Binding ShowTime, Mode=TwoWay}" Toggled="OnShowTimeToggle"/>
 
             </HorizontalStackLayout>
 
