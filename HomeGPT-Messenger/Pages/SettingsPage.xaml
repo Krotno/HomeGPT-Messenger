@@ -22,13 +22,13 @@
 
         <VerticalStackLayout Grid.Row="2" Padding="20,8,20,0" Spacing="8">
 
-            <VerticalStackLayout Spacing="8">
+            <HorizontalStackLayout Spacing="8">
                 <Label Text="Размер текста" LineBreakMode="TailTruncation" TextColor="{DynamicResource TextColor}"
                        FontSize="{DynamicResource AppFontSize}"/>
 
                 <Label Grid.Row="4" x:Name="CurrentFontSizeLabel" FontSize="{DynamicResource AppFontSize}" TextColor="Gray"
                        Margin="9,0,0,0" Text="Текущий размер: Системный" LineBreakMode="TailTruncation"/>
-            </VerticalStackLayout>
+            </HorizontalStackLayout>
 
 
             <Frame Padding="8,4" BackgroundColor="{DynamicResource ButtonBackground}"
@@ -57,7 +57,15 @@
                 </ScrollView>
                 
             </Frame>
-            
+
+            <HorizontalStackLayout Spacing="2">
+
+                <Label HorizontalOptions="Start" Margin="10" VerticalOptions="Center" Text="Показывать время сообщений" FontSize="{DynamicResource AppFontSize}" TextColor="{DynamicResource TextColor}"/>
+
+                <Switch HorizontalOptions="End" Margin="10" VerticalOptions="Center" IsToggled="{Binding ShowTime, Mode=TwoWay}" Toggled="OnShowTimeToggle"/>
+
+            </HorizontalStackLayout>
+
         </VerticalStackLayout>
 
         <BoxView Grid.Row="3"/>

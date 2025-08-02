@@ -87,7 +87,7 @@ public partial class SettingsPage : ContentPage
         }
     }
     #endregion
-
+    #region FontSize (Размер текста)
     private void OnFontSizeChanged(object sender, CheckedChangedEventArgs e)
     {
         if (!e.Value) return;
@@ -123,21 +123,10 @@ public partial class SettingsPage : ContentPage
             _ => "Системный"
         });
     }
+    #endregion
 
-    //private void UpdateFontSizeLabel()
-    //{
-    //    string current = Preferences.Get("fontSize", "system");
-    //    CurrentFontSizeLabel.Text= "Текущий размер: " + (mode switch
-    //    {
-    //        "small" => "Маленький",
-    //        "medium" => "Средний",
-    //        "large" => "Большой",
-    //        _ => "Системный"
-    //    });
-    //    string text = current switch
-    //    {
-    //        ""=>"",
-    //    }
-    //}
-
+    private void OnShowTimeToggle(object sender, ToggledEventArgs e)
+    {
+        Preferences.Set("showTime", e.Value);
+    }
 }

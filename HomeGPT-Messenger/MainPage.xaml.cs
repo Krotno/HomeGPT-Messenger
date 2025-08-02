@@ -233,7 +233,8 @@ namespace HomeGPT_Messenger
                         Text = msg.Timestamp.ToString("HH:mm"),
                         TextColor = Colors.Gray,
                         FontSize = 11,
-                        HorizontalOptions = LayoutOptions.End
+                        HorizontalOptions = LayoutOptions.End,
+                        IsVisible=Preferences.Get("showTime",true)
                     };
 
                     var stack = new VerticalStackLayout
