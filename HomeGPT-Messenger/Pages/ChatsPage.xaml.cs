@@ -33,15 +33,15 @@ public partial class ChatsPage : ContentPage
         ChatsList.ItemsSource = chats;
     }
 
-	private async void OnChatSelected(object sender, SelectionChangedEventArgs e)
-	{
-		var selected = e.CurrentSelection.FirstOrDefault() as Chat;
-		if (selected == null) return;
+	//private async void OnChatSelected(object sender, SelectionChangedEventArgs e)//Удалить в будущем Тест андройд
+	//{
+	//	var selected = e.CurrentSelection.FirstOrDefault() as Chat;
+	//	if (selected == null) return;
 
-		((CollectionView)sender).SelectedItem=null;
+	//	((CollectionView)sender).SelectedItem=null;
 
-        await Navigation.PushAsync(new MainPage(selected.Id, chats)); // Переход + передача
-    }
+ //       await Navigation.PushAsync(new MainPage(selected.Id, chats)); // Переход + передача
+ //   }
 
 	private async void OnChatMenuClicked(object sender, EventArgs e)
 	{

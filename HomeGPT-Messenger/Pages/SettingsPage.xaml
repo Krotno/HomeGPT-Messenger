@@ -86,9 +86,9 @@
             
             <VerticalStackLayout Padding="16,32">
                 <Button Text="Чаты" Clicked="OnChatsClicked" FontSize="{DynamicResource AppFontSize}"
-                        BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
+                        BackgroundColor="{DynamicResource ButtonBackground}" Margin="10" TextColor="{DynamicResource ButtonTextColor}"/>
                 <Button Text="Настройки" Clicked="OnSettingsClicked" FontSize="{DynamicResource AppFontSize}"
-                        BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
+                        BackgroundColor="{DynamicResource ButtonBackground}" Margin="10" TextColor="{DynamicResource ButtonTextColor}"/>
             </VerticalStackLayout>
             
         </Grid>
