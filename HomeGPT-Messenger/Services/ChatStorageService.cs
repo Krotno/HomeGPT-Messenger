@@ -26,8 +26,17 @@ namespace HomeGPT_Messenger.Services
 
         public static async Task SaveChatsAsync(List<Chat> chats)
         {
-            var json = JsonSerializer.Serialize(chats, new JsonSerializerOptions {WriteIndented = true});
-            await File.WriteAllTextAsync(FilePath, json);
+            try
+            {
+                var json = JsonSerializer.Serialize(chats, new JsonSerializerOptions { WriteIndented = true });
+                await File.WriteAllTextAsync(FilePath, json);
+            }
+            catch(Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"SaveChatsAsync ERRPR:{ex}");
+                throw;
+            }
+
         }
     }
 }

@@ -38,6 +38,8 @@ public partial class ChatsPage : ContentPage
 		var selected = e.CurrentSelection.FirstOrDefault() as Chat;
 		if (selected == null) return;
 
+		((CollectionView)sender).SelectedItem=null;
+
         await Navigation.PushAsync(new MainPage(selected.Id, chats)); // Переход + передача
     }
 
@@ -103,5 +105,13 @@ public partial class ChatsPage : ContentPage
     {
         ChatMenuPopup.IsVisible = false;
     }
-    #endregion
+	#endregion
+
+	private async void OnChatFrameTapped(object sender, EventArgs e)
+	{
+        if (sender is Frame frame && frame.BindingContext is Chat chat)
+        {
+            await Navigation.PushAsync(new MainPage(chat.Id, chats));
+        }
+    }
 }

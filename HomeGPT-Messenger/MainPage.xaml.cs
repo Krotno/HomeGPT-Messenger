@@ -2,6 +2,8 @@
 using HomeGPT_Messenger.Pages;
 using HomeGPT_Messenger.Services;
 using System.Net.Http.Json;
+using System.Text;
+using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.Maui.Controls;
 using System.Threading.Tasks;
@@ -219,44 +221,65 @@ namespace HomeGPT_Messenger
             try
             {
                 MessagesLayout.Children.Clear();
+                int i = 0;
                 foreach (var msg in currentChat.Messages)
                 {
-                    var textLabel = new Label
+                    try
                     {
-                        Text = msg.Text,
-                        TextColor = (Color)Application.Current.Resources["TextColor"],
-                        FontSize=(double)Application.Current.Resources["AppFontSize"]
-                    };
+                        Debug.WriteLine($"Рендерим сообщение #{i}: {msg.Text}");
 
-                    var timeLabel = new Label
-                    {
-                        Text = msg.Timestamp.ToString("HH:mm"),
-                        TextColor = Colors.Gray,
-                        FontSize = 11,
-                        HorizontalOptions = LayoutOptions.End,
-                        IsVisible=Preferences.Get("showTime",true)
-                    };
+                        // Логируем ресурсы и preferences перед использованием
+                        if (!Application.Current.Resources.TryGetValue("TextColor", out var textColorObj))
+                            Debug.WriteLine("TextColor не найден в Resources");
+                        if (!Application.Current.Resources.TryGetValue("AppFontSize", out var appFontSizeObj))
+                            Debug.WriteLine("AppFontSize не найден в Resources");
+                        if (!Application.Current.Resources.TryGetValue("MessageBubbleUser", out var userBubble))
+                            Debug.WriteLine("MessageBubbleUser не найден в Resources");
+                        if (!Application.Current.Resources.TryGetValue("MessageBubbleAI", out var aiBubble))
+                            Debug.WriteLine("MessageBubbleAI не найден в Resources");
 
-                    var stack = new VerticalStackLayout
-                    {
-                        Spacing = 2,
-                        Children = { textLabel, timeLabel }
-                    };
+                        var textLabel = new Label
+                        {
+                            Text = msg.Text,
+                            TextColor = (Color)Application.Current.Resources["TextColor"],
+                            FontSize = (double)Application.Current.Resources["AppFontSize"]
+                        };
 
-                    var frame = new Frame
+                        var timeLabel = new Label
+                        {
+                            Text = msg.Timestamp.ToString("HH:mm"),
+                            TextColor = Colors.Gray,
+                            FontSize = 11,
+                            HorizontalOptions = LayoutOptions.End,
+                            IsVisible = Preferences.Get("showTime", true)
+                        };
+
+                        var stack = new VerticalStackLayout
+                        {
+                            Spacing = 2,
+                            Children = { textLabel, timeLabel }
+                        };
+
+                        var frame = new Frame
+                        {
+                            BackgroundColor = msg.Sender == "user"
+                            ? (Color)Application.Current.Resources["MessageBubbleUser"]
+                            : (Color)Application.Current.Resources["MessageBubbleAI"],
+                            CornerRadius = 16,
+                            Padding = 10,
+                            Margin = new Thickness(10, 5),
+                            HasShadow = false,
+                            HorizontalOptions = msg.Sender == "user" ? LayoutOptions.End : LayoutOptions.Start,
+                            Content = stack,
+                            MaximumWidthRequest = 700
+                        };
+                        MessagesLayout.Children.Add(frame);
+                    }
+                    catch (Exception ex)
                     {
-                        BackgroundColor = msg.Sender == "user"
-                        ? (Color)Application.Current.Resources["MessageBubbleUser"]
-                        : (Color)Application.Current.Resources["MessageBubbleAI"],
-                        CornerRadius = 16,
-                        Padding = 10,
-                        Margin = new Thickness(10, 5),
-                        HasShadow = false,
-                        HorizontalOptions = msg.Sender == "user" ? LayoutOptions.End : LayoutOptions.Start,
-                        Content = stack,
-                        MaximumWidthRequest = 700
-                    };
-                    MessagesLayout.Children.Add(frame);
+                        System.Diagnostics.Debug.WriteLine($"Ошибка при добавлении сообщения: {ex.Message} ({msg.Text})");
+                        await Application.Current.MainPage.DisplayAlert("Ошибка", $"Ошибка при добавлении сообщения: {ex.Message}", "OK");
+                    }
                 }
                 MessagesLayout.Children.Add(ChatBottomAnchor);
             }
