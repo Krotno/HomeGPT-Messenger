@@ -67,7 +67,26 @@
 
             </HorizontalStackLayout>
 
+                <Label Text="Адрес LLM(IP:порт)" FontSize="{DynamicResource AppFontSize}"
+                       TextColor="{DynamicResource TextColor}"/>
+
+                <Entry x:Name="IpEntry" Placeholder="192.168.3.77:114340"
+                       FontSize="{DynamicResource AppFontSize}" Background="{DynamicResource ButtonBackground}" 
+                       TextColor="{DynamicResource TextColor}"/>
+
+            <HorizontalStackLayout Spacing="8">
+
+                <Button Text="Сохранить" Clicked="OnSaveIpClicked" BackgroundColor="{DynamicResource ButtonBackground}"
+                        TextColor="{DynamicResource ButtonTextColor}"/>
+                <Button Text="Сброс" Clicked="OnResetIpClicked" BackgroundColor="{DynamicResource ButtonBackground}"
+                        TextColor="{DynamicResource ButtonTextColor}"/>
+
+            </HorizontalStackLayout>
+
         </VerticalStackLayout>
+
+        
+
 
         <BoxView Grid.Row="3"/>
 

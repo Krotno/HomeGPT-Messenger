@@ -21,7 +21,9 @@ namespace HomeGPT_Messenger
         private List<Chat> allChats;
         private CancellationTokenSource _typingStatusCts;//для удобной работы анимации
 
-        private const string OLLAMA_URL = "http://192.168.3.77:11434/api/chat";
+        //private const string OLLAMA_URL = "http://192.168.3.77:11434/api/chat";
+
+        private string OLLAMA_URL = "http://" +Preferences.Get("llm_ip","")+ "/api/chat";// "http://192.168.3.77:11434/api/chat";
 
         public MainPage(Guid chatId,List<Chat> chats)
         {

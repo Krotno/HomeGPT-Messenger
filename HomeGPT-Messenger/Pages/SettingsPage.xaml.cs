@@ -13,6 +13,7 @@ public partial class SettingsPage : ContentPage
         UpdateThemeButtonText();
         SetFontSize(Preferences.Get("fontSize", "system")); //дл€ подт€гивание текущих значений  
         ShowTime.IsToggled = Preferences.Get("showTime", true);
+        IpEntry.Placeholder = Preferences.Get("llm_ip", "");//Ip
     }
     #region Overlay (дл€ меню)
     private void OnMenuOverlayTapped(object sender, EventArgs e)
@@ -127,5 +128,26 @@ public partial class SettingsPage : ContentPage
     private void OnShowTimeToggle(object sender, ToggledEventArgs e)
     {
         Preferences.Set("showTime", e.Value);
+    }
+    
+    private void OnSaveIpClicked(object sender, EventArgs e)
+    {
+        var ip = IpEntry.Text?.Trim();
+
+        if (string.IsNullOrWhiteSpace(ip))
+        {
+            DisplayAlert("ќшибка", "¬ведите корректный IP и порт, например 192.168.1.100:11434", "ќк");
+            return;
+        }
+
+        Preferences.Set("llm_ip", ip);
+        DisplayAlert("”спешно","јдрес сохранен","ќк");
+        IpEntry.Placeholder= Preferences.Get("llm_ip", "");
+    }
+
+    private void OnResetIpClicked(object sender, EventArgs e)
+    {
+        IpEntry.Text = Preferences.Get("llm_ip","");
+        DisplayAlert("—брос", "јдрес сброшен", "ќк");
     }
 }
