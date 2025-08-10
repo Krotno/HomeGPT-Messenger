@@ -15,6 +15,9 @@
                     <Label x:Name="ChatStatusLabel" Text="Готов" FontSize="{DynamicResource AppFontSize}"
                            TextColor="{DynamicResource TimeColor}" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
+
+                <Button Text="Model" x:Name="SelectedModel" Margin="0,16,0,0" Clicked="SelectedModelButtonClicked" HorizontalOptions="End" FontSize="{DynamicResource AppFontSize}"
+                        BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
             </Grid>
 
             <ScrollView x:Name="MessagesScrollView" Grid.Row="1" Margin="0,0,0,0">

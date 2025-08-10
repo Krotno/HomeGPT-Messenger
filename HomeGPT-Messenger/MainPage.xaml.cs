@@ -36,6 +36,7 @@ namespace HomeGPT_Messenger
             ChatStatusLabel.Text = "Готов";
             SendButton.IsEnabled = false;
             SendButton.Opacity = 0.5;
+            SelectedModel.Text = $"Model:{Preferences.Get("llm_model", "")}";
         }
 
         #region Animation(Анимации Ассистент)
@@ -176,6 +177,7 @@ namespace HomeGPT_Messenger
         {
             try
             {
+                var model = Preferences.Get("llm_model", "");
                 using var client = new HttpClient();
                 client.Timeout = TimeSpan.FromMinutes(5);//ждет ответа модели 5 минут
 
@@ -187,7 +189,7 @@ namespace HomeGPT_Messenger
 
                 var reqObj = new
                 {
-                    model = "dolphin-mistral",
+                    model,
                     stream = false,
                     messages = messagesForLLM
                 };
@@ -374,5 +376,18 @@ namespace HomeGPT_Messenger
             await Navigation.PushAsync(new SettingsPage());
         }
         #endregion
+
+        private async void SelectedModelButtonClicked(object sender, EventArgs e)
+        {
+            var models = new[] { "llama3", "dolphin-mistral", "tinyllama:1.1b" };
+
+            string selected = await DisplayActionSheet("Выберите модель", "Отмена", null,models);
+
+            if (string.IsNullOrEmpty(selected) || selected == "Отмена") return;
+
+            Preferences.Set("llm_model", selected);
+
+            SelectedModel.Text = $"Model:{selected}";
+        }
     }
 }
