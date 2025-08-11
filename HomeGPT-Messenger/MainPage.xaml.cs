@@ -30,6 +30,11 @@ namespace HomeGPT_Messenger
             InitializeComponent();
             currentChat = chats.FirstOrDefault(c=>c.Id==chatId);
             allChats = chats;
+            var globalModel = Preferences.Get("llm_model", "");
+            if (string.IsNullOrWhiteSpace(currentChat.ModelName))
+            {
+                currentChat.ModelName = globalModel;
+            }
             RenderMessages();
             NavigationPage.SetHasBackButton(this, false);
             ChatNameLabel.Text = currentChat.Name??"Чат";
@@ -177,9 +182,9 @@ namespace HomeGPT_Messenger
         {
             try
             {
-                var model = Preferences.Get("llm_model", "");
-                using var client = new HttpClient();
-                client.Timeout = TimeSpan.FromMinutes(5);//ждет ответа модели 5 минут
+                var model = string.IsNullOrWhiteSpace(chat.ModelName) ? Preferences.Get("llm_model", "") : chat.ModelName;
+                using var client = new HttpClient(); client.Timeout = TimeSpan.FromMinutes(5);//ждет ответа модели 5 минут
+
 
                 var messagesForLLM = messages.TakeLast(20).Select(mbox => new//Отправляет 20 сообщений за раз
                 {
@@ -310,6 +315,7 @@ namespace HomeGPT_Messenger
                 allChats = await ChatStorageService.LoadChatsAsync();
                 var updatedChat = allChats.FirstOrDefault(c => c.Id == currentChat.Id);
                 if (updatedChat != null) currentChat = updatedChat;
+                SelectedModel.Text = $"Model:{currentChat.ModelName ?? Preferences.Get("llm_model", "")}";
                 RenderMessages();
                 _ = ScrollMessagesToEndAsync();
 
@@ -384,6 +390,10 @@ namespace HomeGPT_Messenger
             string selected = await DisplayActionSheet("Выберите модель", "Отмена", null,models);
 
             if (string.IsNullOrEmpty(selected) || selected == "Отмена") return;
+
+            currentChat.ModelName = selected;
+
+            await ChatStorageService.SaveChatsAsync(allChats);
 
             Preferences.Set("llm_model", selected);
 

@@ -4,7 +4,7 @@
              BackgroundColor="{DynamicResource BackgroundColor}"
              x:Class="HomeGPT_Messenger.MainPage" Padding="0">
     <Grid>
-        <Grid RowDefinitions="48,*,auto">
+        <Grid RowDefinitions="56,*,auto">
             <Grid Grid.Row="0" BackgroundColor="{DynamicResource BackgroundColor}">
                 <Button Grid.Column="0" Text="☰" Margin="0,16,0,0" Clicked="OnMenuButtonClicked" HorizontalOptions="Start" FontSize="{DynamicResource AppFontSize}"
                         BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
@@ -16,7 +16,7 @@
                            TextColor="{DynamicResource TimeColor}" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
 
-                <Button Text="Model" x:Name="SelectedModel" Margin="0,16,0,0" Clicked="SelectedModelButtonClicked" HorizontalOptions="End" FontSize="{DynamicResource AppFontSize}"
+                <Button Grid.Column="2" Text="Model" x:Name="SelectedModel" Margin="0,16,0,0" Clicked="SelectedModelButtonClicked" HorizontalOptions="End" FontSize="{DynamicResource AppFontSize}"
                         BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
             </Grid>
 

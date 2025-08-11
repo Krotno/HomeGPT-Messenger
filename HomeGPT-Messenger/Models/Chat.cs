@@ -9,5 +9,7 @@ namespace HomeGPT_Messenger.Models
         public string Name { get; set; }
         public List<Message> Messages { get; set; } = new List<Message>();
         public bool IsFrozen { get; set; }
+
+        public string? ModelName { get; set; }//Запоминаем модель LLM в чате
     }
 }
