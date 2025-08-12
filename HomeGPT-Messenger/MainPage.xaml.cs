@@ -214,7 +214,7 @@ namespace HomeGPT_Messenger
             }
             catch (Exception ex) { return $"[Error:{ex.Message}]"; }
         }
-
+        #region (Class) Классы для модели
         public class OllamaResponse
         {
             public MessageObj message { get; set; }
@@ -224,6 +224,17 @@ namespace HomeGPT_Messenger
                 public string content { get; set; }
             }
         }
+
+        class OllanaTags
+        {
+            public List<OllamaModel> models { get; set; }
+        }
+
+        class OllamaModel
+        {
+            public string name { get; set; } = "";
+        }
+        #endregion
 
         private async Task RenderMessages()
         {
@@ -315,7 +326,7 @@ namespace HomeGPT_Messenger
                 allChats = await ChatStorageService.LoadChatsAsync();
                 var updatedChat = allChats.FirstOrDefault(c => c.Id == currentChat.Id);
                 if (updatedChat != null) currentChat = updatedChat;
-                SelectedModel.Text = $"Model:{currentChat.ModelName ?? Preferences.Get("llm_model", "")}";
+                SelectedModel.Text = $"Model:{currentChat.ModelName ?? Preferences.Get("llm_model", "").Split('-', ':')[0]}";
                 RenderMessages();
                 _ = ScrollMessagesToEndAsync();
 
@@ -385,9 +396,19 @@ namespace HomeGPT_Messenger
 
         private async void SelectedModelButtonClicked(object sender, EventArgs e)
         {
-            var models = new[] { "llama3", "dolphin-mistral", "tinyllama:1.1b" };
+            string[] models;
+            try
+            {
+                models = await GetOllamaModelsAsync();
+                if (models.Length == 0) models = new[] { "llama3", "mistral:7b", "tinyllama:1.1b" };
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Ollama", $"Не удалось получить список моделей:\n{ex.Message}", "Ок");
+                models=new[] { "llama3", "mistral:7b", "tinyllama:1.1b" };
+            }
 
-            string selected = await DisplayActionSheet("Выберите модель", "Отмена", null,models);
+            var selected = await DisplayActionSheet("Выберите модель", "Отмена", null,models);
 
             if (string.IsNullOrEmpty(selected) || selected == "Отмена") return;
 
@@ -397,7 +418,18 @@ namespace HomeGPT_Messenger
 
             Preferences.Set("llm_model", selected);
 
-            SelectedModel.Text = $"Model:{selected}";
+            SelectedModel.Text = $"Model:{selected.Split('-', ':')[0]}";
+        }
+
+        private async Task<string[]> GetOllamaModelsAsync()
+        {
+            var ip = Preferences.Get("llm_ip", "");
+            var baseUrl = $"http://{ip}";
+            using var http = new HttpClient{BaseAddress = new Uri(baseUrl), Timeout = TimeSpan.FromSeconds(5)};
+            var resp = await http.GetAsync("/api/tags");
+            resp.EnsureSuccessStatusCode();
+            var data = await resp.Content.ReadFromJsonAsync<OllanaTags>();
+            return (data?.models ?? new()).Select(m => m.name).OrderBy(n => n).ToArray();
         }
     }
 }
