@@ -41,7 +41,7 @@ namespace HomeGPT_Messenger
             ChatStatusLabel.Text = "Готов";
             SendButton.IsEnabled = false;
             SendButton.Opacity = 0.5;
-            SelectedModel.Text = $"Model:{Preferences.Get("llm_model", "")}";
+            //SelectedModel.Text = $"Model:{Preferences.Get("llm_model", "")}";
         }
 
         #region Animation(Анимации Ассистент)
@@ -326,7 +326,8 @@ namespace HomeGPT_Messenger
                 allChats = await ChatStorageService.LoadChatsAsync();
                 var updatedChat = allChats.FirstOrDefault(c => c.Id == currentChat.Id);
                 if (updatedChat != null) currentChat = updatedChat;
-                SelectedModel.Text = $"Model:{currentChat.ModelName ?? Preferences.Get("llm_model", "").Split('-', ':')[0]}";
+                var splitText = Preferences.Get("llm_model","");
+                SelectedModel.Text = $"M:{splitText.Split('-', ':')[0]}";
                 RenderMessages();
                 _ = ScrollMessagesToEndAsync();
 
@@ -418,7 +419,7 @@ namespace HomeGPT_Messenger
 
             Preferences.Set("llm_model", selected);
 
-            SelectedModel.Text = $"Model:{selected.Split('-', ':')[0]}";
+            SelectedModel.Text = $"M:{selected.Split('-', ':')[0]}";
         }
 
         private async Task<string[]> GetOllamaModelsAsync()

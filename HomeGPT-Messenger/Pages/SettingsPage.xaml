@@ -70,9 +70,17 @@
                 <Label Text="Адрес LLM(IP:порт)" FontSize="{DynamicResource AppFontSize}"
                        TextColor="{DynamicResource TextColor}"/>
 
+            <HorizontalStackLayout Spacing="8">
+
                 <Entry x:Name="IpEntry" Placeholder="192.168.3.77:114340"
-                       FontSize="{DynamicResource AppFontSize}" Background="{DynamicResource ButtonBackground}" 
-                       TextColor="{DynamicResource TextColor}"/>
+                   FontSize="{DynamicResource AppFontSize}" Background="{DynamicResource ButtonBackground}" 
+                   TextColor="{DynamicResource TextColor}"/>
+
+                <Label Text="ms:" x:Name="PingLabel" FontSize="{DynamicResource AppFontSize}" 
+                       TextColor="{DynamicResource TextColor}" VerticalOptions="Center" HorizontalOptions="FillAndExpand"/>
+                
+            </HorizontalStackLayout>
+                
 
             <HorizontalStackLayout Spacing="8">
 
@@ -85,13 +93,8 @@
 
         </VerticalStackLayout>
 
-        
-
-
         <BoxView Grid.Row="3"/>
-
         
-
         <BoxView Grid.RowSpan="6" x:Name="MenuOverlay" IsVisible="{Binding Source={x:Reference SideMenu}, Path=IsVisible}"
          BackgroundColor="{DynamicResource MenuOverlayColor}" InputTransparent="False">
             
