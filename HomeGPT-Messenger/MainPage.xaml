@@ -5,18 +5,20 @@
              x:Class="HomeGPT_Messenger.MainPage" Padding="0">
     <Grid>
         <Grid RowDefinitions="56,*,auto">
-            <Grid Grid.Row="0" BackgroundColor="{DynamicResource BackgroundColor}">
+            <Grid ColumnDefinitions="40,40,*,auto" Grid.Row="0" BackgroundColor="{DynamicResource BackgroundColor}">
                 <Button Grid.Column="0" Text="☰" Margin="0,16,0,0" Clicked="OnMenuButtonClicked" HorizontalOptions="Start" FontSize="{DynamicResource AppFontSize}"
                         BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
+                <Button Grid.Column="1" Text="P" x:Name="PromtButton" Clicked="OnPromtClicked" HorizontalOptions="Start" Margin="0,16,0,0"  FontSize="{DynamicResource AppFontSize}"
+                        Background="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
 
-                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Center">
+                <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" HorizontalOptions="Center">
                     <Label x:Name="ChatNameLabel" Text="Имя чата" FontSize="{DynamicResource AppFontSize}"
                            TextColor="{DynamicResource TextColor}" FontAttributes="Bold" HorizontalOptions="Center"/>
                     <Label x:Name="ChatStatusLabel" Text="Готов" FontSize="{DynamicResource AppFontSize}"
                            TextColor="{DynamicResource TimeColor}" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
 
-                <Button Grid.Column="2" Text="Model" x:Name="SelectedModel" Margin="0,16,0,0" Clicked="SelectedModelButtonClicked" HorizontalOptions="End" FontSize="{DynamicResource AppFontSize}"
+                <Button Grid.Column="3" Text="Model" x:Name="SelectedModel" Margin="0,16,0,0" Clicked="SelectedModelButtonClicked" HorizontalOptions="End" FontSize="{DynamicResource AppFontSize}"
                         BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
             </Grid>
 

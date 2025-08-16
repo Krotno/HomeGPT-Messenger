@@ -233,14 +233,20 @@ namespace HomeGPT_Messenger
             {
                 var model = string.IsNullOrWhiteSpace(chat.ModelName) ? Preferences.Get("llm_model", "") : chat.ModelName;
                 using var client = new HttpClient(); client.Timeout = TimeSpan.FromMinutes(5);//ждет ответа модели 5 минут
+                bool HasSystem = !string.IsNullOrWhiteSpace(chat.SystemPromt); const int limit = 20; int tail = HasSystem ? limit - 1 : limit;
 
-
-                var messagesForLLM = messages.TakeLast(20).Select(mbox => new//Отправляет 20 сообщений за раз
+                var lastMsgs= messages.TakeLast(Math.Max(0,tail)).Select(mbox => new//Отправляет 20 сообщений за раз
                 {
                     role = mbox.Sender == "user" ? "user" : "assistant",
                     content = mbox.Text
                 }).ToList();
 
+                var messagesForLLM = new List<object>(limit);
+                if (HasSystem)
+                    messagesForLLM.Add(new { role = "system", content = chat.SystemPromt!.Trim() });
+
+                messagesForLLM.AddRange(lastMsgs);
+                
                 var reqObj = new
                 {
                     model,
@@ -402,6 +408,7 @@ namespace HomeGPT_Messenger
                 isWaiting = wainting;
                 SendButton.IsEnabled=!wainting&& !string.IsNullOrWhiteSpace(InputEntry.Text);
                 SendButton.Opacity = SendButton.IsEnabled ? 1.0 : 0.5;
+                UpdatePromtBadge();
             }
             catch (Exception ex)
             {
@@ -503,5 +510,38 @@ namespace HomeGPT_Messenger
             SendButton.IsEnabled=!string.IsNullOrWhiteSpace(InputEntry.Text);
             SendButton.Opacity = SendButton.IsEnabled ? 1.0 : 0.5;
         }
+        #region Promt
+        private async void OnPromtClicked(object sender, EventArgs e)
+        {
+            var current = currentChat.SystemPromt ?? "";
+            var result = await DisplayPromptAsync(
+                "Системный промт",
+                "Короткий контекст для модели (до 100 символов). Пусто = без промта",
+                accept: "Сохранить",
+                cancel: "Отмена",
+                placeholder: "Напри.: «Отвечай кратко, на русском»)",
+                maxLength: 100,
+                keyboard: Keyboard.Default,
+                initialValue: current
+                );
+
+            if (result is null) return;
+            result = result.Trim();
+            if (result.Length > 100) result = result[..100];
+            
+            currentChat.SystemPromt= result;
+            await ChatStorageService.SaveChatsAsync(allChats);
+            await DisplayAlert("Промт", string.IsNullOrEmpty(result) ? "Промт очищен" : "Промт сохранён", "Ок");
+            PromtButton.Text = !string.IsNullOrWhiteSpace(currentChat.SystemPromt) ? "P*" : "P";
+        }
+
+        private void UpdatePromtBadge()
+        {
+            var Has = !string.IsNullOrWhiteSpace(currentChat.SystemPromt);
+            PromtButton.Text = Has ? "P*" : "P";
+            AutomationProperties.SetHelpText(PromtButton, Has ? "Задан системный промт" : "Системный промт не задан");
+        }
+        #endregion
+
     }
 }

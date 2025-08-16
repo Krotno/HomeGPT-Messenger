@@ -16,7 +16,7 @@
             <Button Text="Новый чат" Clicked="OnAddChatClicked" Padding="16" CornerRadius="30" BackgroundColor="{DynamicResource ButtonBackground}"
                         TextColor="{DynamicResource ButtonTextColor}" FontSize="{DynamicResource AppFontSize}" Margin="10,5,10,0"/>
 
-            <CollectionView Margin="18,5,18,5" x:Name="ChatsList" SelectionMode="None" HeightRequest="400">
+            <CollectionView Margin="18,5,18,5" x:Name="ChatsList" SelectionMode="None" HeightRequest="550">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Frame Padding="16" CornerRadius="50" BackgroundColor="{DynamicResource MessageBubbleAI}">
