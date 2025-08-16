@@ -34,6 +34,10 @@
                        Completed="InputEntry_Completed"
                        TextChanged="InputEntry_TextChanged"
                        FontSize="{DynamicResource AppFontSize}"/>
+                
+                <Button x:Name="CancelButton" Text="!!" IsVisible="False" HorizontalOptions="End" WidthRequest="44" HeightRequest="44" Clicked="OnCancelClicked" 
+                        BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
+                
                 <Button Grid.Column="1" Text="Send" x:Name="SendButton" Clicked="OnSendClicked" FontSize="{DynamicResource AppFontSize}"
                         BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
             </Grid>

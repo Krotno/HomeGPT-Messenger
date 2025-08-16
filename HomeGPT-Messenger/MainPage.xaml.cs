@@ -20,10 +20,11 @@ namespace HomeGPT_Messenger
         private Chat currentChat;
         private List<Chat> allChats;
         private CancellationTokenSource _typingStatusCts;//для удобной работы анимации
+        private CancellationTokenSource _requestCts;
 
         //private const string OLLAMA_URL = "http://192.168.3.77:11434/api/chat";
 
-        private string OLLAMA_URL = "http://" +Preferences.Get("llm_ip","")+ "/api/chat";// "http://192.168.3.77:11434/api/chat";
+        private string OLLAMA_URL = $"http://{Preferences.Get("llm_ip","")}/api/chat";// "http://192.168.3.77:11434/api/chat";
 
         public MainPage(Guid chatId,List<Chat> chats)
         {
@@ -50,35 +51,68 @@ namespace HomeGPT_Messenger
             try
             {
                 _typingStatusCts?.Cancel();
+                _typingStatusCts?.Dispose();
                 _typingStatusCts = new CancellationTokenSource();
-                var token = _typingStatusCts.Token;
+
+                var cts = _typingStatusCts;
+                var token = cts.Token;
                 string baseText = "Ассистент генерирует ответ";
-                int maxDots = 5;
-                int dots = 0;
-                while (!token.IsCancellationRequested)
+                int maxDots = 5; int dots = 0;
+
+                while (!token.IsCancellationRequested && _typingStatusCts == cts)
                 {
                     dots = (dots + 1) % (maxDots + 1);
                     Device.BeginInvokeOnMainThread(() =>
                     {
+                        if (this.Handler == null || ChatStatusLabel?.Handler == null) return;
+                        if (_typingStatusCts != cts || token.IsCancellationRequested) return;
                         ChatStatusLabel.Text = baseText + new string('.', dots);
                     });
+
                     await Task.Delay(400, token);
                 }
             }
-            catch(TaskCanceledException)
-            {
-                //Ловим ошибку при ответе LLM 
-            }
+            catch (OperationCanceledException) {/*Корректная отмена анимации*/}
+            catch (ObjectDisposedException) {/*Ловим страницу*/}
             catch (Exception ex)
             {
-                await DisplayAlert("Ошибка просим обратиться в поддержку", ex.Message, "ОК");
+                if (this?.Handler != null)
+                    await MainThread.InvokeOnMainThreadAsync(() =>
+                        DisplayAlert("Ошибка просим обратиться в поддержку", ex.Message, "ОК"));
+            }
+            finally
+            {
+                if (this?.Handler != null && ChatStatusLabel?.Handler != null)
+                    Device.BeginInvokeOnMainThread(() => ChatStatusLabel.Text = "Готов");
             }
         }
 
         private void StopTypingStatus()
         {
             _typingStatusCts?.Cancel();
-            ChatStatusLabel.Text = "Готов";
+            _typingStatusCts?.Dispose();
+            _typingStatusCts = null;
+            if (this?.Handler != null && ChatStatusLabel?.Handler != null)
+                    Device.BeginInvokeOnMainThread(() => ChatStatusLabel.Text = "Готов");
+        }
+
+        protected override void OnDisappearing()
+        {
+            try
+            {
+                _typingStatusCts?.Cancel();
+                _typingStatusCts?.Dispose();
+                _typingStatusCts = null;
+
+                _requestCts?.Cancel();
+                _requestCts?.Dispose();
+                _requestCts = null;
+            }
+            catch
+            {
+                //Ловим ошибку при ответе LLM
+            }
+            base.OnDisappearing();
         }
         #endregion
 
@@ -93,6 +127,12 @@ namespace HomeGPT_Messenger
             isWaiting=true;
             SendButton.IsEnabled = false;
             SendButton.Opacity = 0.5;
+            CancelButton.IsVisible = true;
+
+            _requestCts?.Cancel();
+            _requestCts?.Dispose();
+            _requestCts=new CancellationTokenSource();
+
             try
             {
                 var userText = InputEntry.Text?.Trim();
@@ -123,7 +163,7 @@ namespace HomeGPT_Messenger
                     try
                     {
                         var allMessages = currentChat.Messages.ToList();//Копирует историю + текущее сообщение
-                        var aiText = await SendToLLMAsync(currentChat, allMessages);//отправка копии
+                        var aiText = await SendToLLMAsync(currentChat, allMessages,_requestCts.Token);//отправка копии
                         var aiMessage = new Message
                         {
                             Sender = "ai",
@@ -149,8 +189,10 @@ namespace HomeGPT_Messenger
                         Device.BeginInvokeOnMainThread(() =>
                         {
                             StopTypingStatus();
-                            DisplayAlert("Ошибка просим обратиться в поддержку", "Запрос был отменен", "ОК");
+                            //DisplayAlert("Ошибка просим обратиться в поддержку", "Запрос был отменен", "ОК");
                         });
+                        userMessage.Status=MessageStatus.Done;
+                        await ChatStorageService.SaveChatsAsync(allChats);
                     }
                     catch (Exception ex)
                     {
@@ -159,14 +201,19 @@ namespace HomeGPT_Messenger
                             StopTypingStatus();
                             DisplayAlert("Ошибка просим обратиться в поддержку", ex.Message, "ОК");
                         });
+                        userMessage.Status = MessageStatus.Done;
+                        await ChatStorageService.SaveChatsAsync(allChats);
                     }
                     finally
                     {
                         Device.BeginInvokeOnMainThread(() =>
                         {
                             isWaiting = false;
+                            CancelButton.IsVisible = false;
                             SendButton.IsEnabled = !string.IsNullOrWhiteSpace(InputEntry.Text) && !isWaiting;
                             SendButton.Opacity = SendButton.IsEnabled ? 1.0 : 0.5;
+                            _requestCts?.Dispose();
+                            _requestCts = null;
                         });
                     }
                 });
@@ -174,11 +221,13 @@ namespace HomeGPT_Messenger
             catch (Exception ex)
             {
                 await DisplayAlert("Ошибка просим обратиться в поддержку", ex.Message, "ОК");
+                isWaiting=false;
+                CancelButton.IsVisible = false;
             }            
         }
 
         private bool isWaiting = false;
-        private async Task<string> SendToLLMAsync(Chat chat,List<Message> messages)
+        private async Task<string> SendToLLMAsync(Chat chat,List<Message> messages, CancellationToken ct)
         {
             try
             {
@@ -206,12 +255,13 @@ namespace HomeGPT_Messenger
                 //});
                 //await DisplayAlert("Отправляймые", jsonReq, "OK");
 
-                var response = await client.PostAsJsonAsync(OLLAMA_URL, reqObj);
+                var response = await client.PostAsJsonAsync(OLLAMA_URL, reqObj,ct);
                 response.EnsureSuccessStatusCode();
 
-                var json = await response.Content.ReadFromJsonAsync<OllamaResponse>();
+                var json = await response.Content.ReadFromJsonAsync<OllamaResponse>(cancellationToken: ct);
                 return json?.message?.content ?? "(No response)";
             }
+            catch (TaskCanceledException) { throw; }
             catch (Exception ex) { return $"[Error:{ex.Message}]"; }
         }
         #region (Class) Классы для модели
@@ -331,16 +381,27 @@ namespace HomeGPT_Messenger
                 RenderMessages();
                 _ = ScrollMessagesToEndAsync();
 
-                var lastMsg = currentChat.Messages.LastOrDefault();
-                if (lastMsg != null && lastMsg.Sender == "user" &&
-                    (currentChat.Messages.Count == 1 || currentChat.Messages.Last().Sender == "user"))
-                {
-                    _ = StartTypingStatusAsync();
-                }
-                else
-                {
-                    StopTypingStatus();
-                }
+                //var lastMsg = currentChat.Messages.LastOrDefault();
+                //if (lastMsg != null && lastMsg.Sender == "user" &&
+                //    (currentChat.Messages.Count == 1 || currentChat.Messages.Last().Sender == "user"))
+                //{
+                //    _ = StartTypingStatusAsync();
+                //}
+                //else
+                //{
+                //    StopTypingStatus();
+                //}
+
+                var last = currentChat.Messages.LastOrDefault();
+                var wainting = last?.Sender == "user" && last?.Status == MessageStatus.WaitingForResponse;
+
+                if (wainting) _ = StartTypingStatusAsync();
+                else StopTypingStatus();
+
+                CancelButton.IsVisible=wainting;
+                isWaiting = wainting;
+                SendButton.IsEnabled=!wainting&& !string.IsNullOrWhiteSpace(InputEntry.Text);
+                SendButton.Opacity = SendButton.IsEnabled ? 1.0 : 0.5;
             }
             catch (Exception ex)
             {
@@ -431,6 +492,16 @@ namespace HomeGPT_Messenger
             resp.EnsureSuccessStatusCode();
             var data = await resp.Content.ReadFromJsonAsync<OllanaTags>();
             return (data?.models ?? new()).Select(m => m.name).OrderBy(n => n).ToArray();
+        }
+
+        private void OnCancelClicked(object sender, EventArgs e)
+        {
+            _requestCts?.Cancel();
+            StopTypingStatus();
+            isWaiting = false;
+            CancelButton.IsVisible=false;
+            SendButton.IsEnabled=!string.IsNullOrWhiteSpace(InputEntry.Text);
+            SendButton.Opacity = SendButton.IsEnabled ? 1.0 : 0.5;
         }
     }
 }
