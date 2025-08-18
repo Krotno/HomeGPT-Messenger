@@ -24,24 +24,23 @@ public partial class ChatsPage : ContentPage
 
 	private async void OnAddChatClicked(object sender,EventArgs e)//test
 	{
+		var type = await DisplayActionSheet("Тип чата", "Отмена", null, "Текст", "Изображения");
+		if (type is null || type == "Отмена") return;
+
 		string name = await DisplayPromptAsync("Новый чат", "Введите название чата: ");
 		if (string.IsNullOrWhiteSpace(name)) return;
-		var chat=new Chat { Name= name };
+
+		var chat=new Chat 
+		{ 
+			Name= name.Trim(),
+			Kind=type=="Текст" ? ChatKid.Text: ChatKid.Image
+		};
+
 		chats.Add(chat);
 		await ChatStorageService.SaveChatsAsync(chats);
         ChatsList.ItemsSource = null;
         ChatsList.ItemsSource = chats;
     }
-
-	//private async void OnChatSelected(object sender, SelectionChangedEventArgs e)//Удалить в будущем Тест андройд
-	//{
-	//	var selected = e.CurrentSelection.FirstOrDefault() as Chat;
-	//	if (selected == null) return;
-
-	//	((CollectionView)sender).SelectedItem=null;
-
- //       await Navigation.PushAsync(new MainPage(selected.Id, chats)); // Переход + передача
- //   }
 
 	private async void OnChatMenuClicked(object sender, EventArgs e)
 	{
@@ -111,7 +110,8 @@ public partial class ChatsPage : ContentPage
 	{
         if (sender is Frame frame && frame.BindingContext is Chat chat)
         {
-            await Navigation.PushAsync(new MainPage(chat.Id, chats));
+			if (chat.Kind == ChatKid.Text) await Navigation.PushAsync(new MainPage(chat.Id, chats));
+			else await Navigation.PushAsync(new ImageChatPage(chat.Id, chats));
         }
     }
 }

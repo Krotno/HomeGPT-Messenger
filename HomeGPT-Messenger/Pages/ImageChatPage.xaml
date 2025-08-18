@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="HomeGPT_Messenger.Pages.ImageChatPage"
+             BackgroundColor="{DynamicResource BackgroundColor}"
+             Padding="0">
+    <Grid>
+        <Grid RowDefinitions="56,*,auto">
+            
+            <Grid Grid.Row="0" ColumnDefinitions="40,40,*,auto,auto"
+                  BackgroundColor="{DynamicResource BackgroundColor}">
+
+                <Button Grid.Column="0" Text="☰" Margin="0,16,0,0" Clicked="OnMenuButtonClicked" FontSize="{DynamicResource AppFontSize}" 
+                        BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
+
+                <Button Grid.Column="1" x:Name="NegButton" Text="N" Margin="0,16,0,0" Clicked="OnNegClicked" FontSize="{DynamicResource AppFontSize}"
+                        BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
+
+                <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" HorizontalOptions="Center">
+                    
+                    <Label x:Name="ChatNameLabel" Text="!!!" FontAttributes="Bold" FontSize="{DynamicResource AppFontSize}"
+                           TextColor="{DynamicResource TextColor}" HorizontalOptions="Center"/>
+                    
+                    <Label x:Name="ChatStatusLabel" Text="Готов" FontSize="{DynamicResource AppFontSize}"
+                           TextColor="{DynamicResource TimeColor}" HorizontalOptions="Center"/>
+                    
+                </VerticalStackLayout>
+
+                <Button Grid.Column="3" x:Name="SizeButton" Text="512x512" Margin="0,16,0,0" Clicked="OnSizeClicked" FontSize="{DynamicResource AppFontSize}" 
+                        BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
+
+                <Button Grid.Column="4" x:Name="StepsButton" Text="Steps:4" Margin="0,16,0,0" Clicked="OnStepsClicked" FontSize="{DynamicResource AppFontSize}"
+                        BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
+                
+            </Grid>
+
+            <ScrollView x:Name="MessagesScrollView" Grid.Row="1" Margin="0,0,0,0">
+                
+                <VerticalStackLayout x:Name="MessagesLayout" Spacing="8" Padding="10">
+                    
+                    <BoxView x:Name="ChatBottomAnchor" HeightRequest="1"/>
+                    
+                </VerticalStackLayout>
+                
+            </ScrollView>
+
+            <Grid Grid.Row="2" ColumnDefinitions="*,auto" Padding="10"
+                  BackgroundColor="{DynamicResource InputBackground}">
+                
+                <Entry x:Name="InputEntry" Placeholder="Describe the image..." TextColor="{DynamicResource TextColor}" BackgroundColor="{DynamicResource InputBackground}"
+                       Completed="InputEntry_Completed" TextChanged="InputEntry_TextChanged" FontSize="{DynamicResource AppFontSize}"/>
+
+                <Button x:Name="CancelButton" Text="!!" IsVisible="False" HorizontalOptions="End" WidthRequest="44" HeightRequest="44"
+                        Clicked="OnCancelClicked" BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
+
+                <Button Grid.Column="1" x:Name="GenerationButton" Text="Generate" Clicked="OnGenerateClicked" FontSize="{DynamicResource AppFontSize}"
+                        BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource ButtonTextColor}"/>
+                
+            </Grid>
+            
+        </Grid>
+
+        <BoxView x:Name="MenuOverlay" IsVisible="{Binding Source={x:Reference SideMenu}, Path=IsVisible}"
+                 BackgroundColor="{DynamicResource MenuOverlayColor}" InputTransparent="False">
+
+            <BoxView.GestureRecognizers>
+
+                <TapGestureRecognizer Tapped="OnMenuOverlayTapped"/>
+                
+            </BoxView.GestureRecognizers>
+            
+        </BoxView>
+
+        <Grid x:Name="SideMenu" IsVisible="False" BackgroundColor="{DynamicResource MenuBackground}" WidthRequest="200"
+              VerticalOptions="Fill" HorizontalOptions="Start" ZIndex="100">
+
+            <VerticalStackLayout Padding="16,32">
+
+                <Button Text="Чаты" Clicked="OnChatsClicked" Margin="10" BackgroundColor="{DynamicResource ButtonBackground}"
+                        FontSize="{DynamicResource AppFontSize}" TextColor="{DynamicResource ButtonTextColor}"/>
+
+                <Button Text="Настройки" Clicked="OnSettingsClicked" Margin="10" BackgroundColor="{DynamicResource ButtonBackground}"
+                        FontSize="{DynamicResource AppFontSize}" TextColor="{DynamicResource ButtonTextColor}"/>
+                
+            </VerticalStackLayout>
+            
+        </Grid>
+        
+    </Grid>
+    
+</ContentPage>
