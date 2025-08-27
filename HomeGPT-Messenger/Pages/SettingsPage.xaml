@@ -67,20 +67,27 @@
 
             </HorizontalStackLayout>
 
-                <Label Text="Адрес LLM(IP:порт)" FontSize="{DynamicResource AppFontSize}"
-                       TextColor="{DynamicResource TextColor}"/>
+            <Grid ColumnDefinitions="Auto,*,Auto,70,Auto,70,Auto" ColumnSpacing="8" VerticalOptions="Center">
 
-            <HorizontalStackLayout Spacing="8">
+                <Label Grid.Column="0" Text="Адрес (IP)" FontSize="{DynamicResource AppFontSize}" TextColor="{DynamicResource TextColor}" VerticalOptions="Center"/>
 
-                <Entry x:Name="IpEntry" Placeholder="192.168.3.77:114340"
-                   FontSize="{DynamicResource AppFontSize}" Background="{DynamicResource ButtonBackground}" 
-                   TextColor="{DynamicResource TextColor}"/>
+                <Entry Grid.Column="1" x:Name="IpEntry" Placeholder="192.168.3.77" HorizontalOptions="FillAndExpand" FontSize="{DynamicResource AppFontSize}"
+                       BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource TextColor}"/>
 
-                <Label Text="ms:" x:Name="PingLabel" FontSize="{DynamicResource AppFontSize}" 
-                       TextColor="{DynamicResource TextColor}" VerticalOptions="Center" HorizontalOptions="FillAndExpand"/>
-                
-            </HorizontalStackLayout>
-                
+
+                <Label Grid.Column="2" Text="LLM Port" FontSize="{DynamicResource AppFontSize}" TextColor="{DynamicResource TextColor}" VerticalOptions="Center"/>
+
+                <Entry Grid.Column="3" x:Name="LlmPortEntry" Placeholder="112" WidthRequest="15" MaxLength="5" Keyboard="Numeric" FontSize="{DynamicResource AppFontSize}"
+                       BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource TextColor}" HorizontalTextAlignment="Center"/>
+
+                <Label Grid.Column="4" Text="SD Port" FontSize="{DynamicResource AppFontSize}" TextColor="{DynamicResource TextColor}" VerticalOptions="Center"/>
+
+                <Entry Grid.Column="5" x:Name="SdPortEntry" Placeholder="243" WidthRequest="15" MaxLength="5"  Keyboard="Numeric" FontSize="{DynamicResource AppFontSize}"
+                       BackgroundColor="{DynamicResource ButtonBackground}" TextColor="{DynamicResource TextColor}" HorizontalTextAlignment="Center"/>
+
+                <Label Grid.Column="6" x:Name="PingLabel" Text="Ок" FontSize="{DynamicResource AppFontSize}" TextColor="{DynamicResource TextColor}"
+                       VerticalOptions="Center"/>
+            </Grid>
 
             <HorizontalStackLayout Spacing="8">
 

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Net.NetworkInformation;
 
 namespace HomeGPT_Messenger.Pages;
 
@@ -16,20 +17,29 @@ public partial class SettingsPage : ContentPage
         UpdateThemeButtonText();
         SetFontSize(Preferences.Get("fontSize", "system")); //для подтягивание текущих значений  
         ShowTime.IsToggled = Preferences.Get("showTime", true);
-        var ip = Preferences.Get("llm_ip", "");
-        if (!string.IsNullOrWhiteSpace(ip))
-        {
-            IpEntry.Placeholder = Preferences.Get("llm_ip", "");//Ip
-        }
-       
+        var ipSaved = Preferences.Get("llm_ip", "");
+
+        IpEntry.Placeholder = string.IsNullOrWhiteSpace(ipSaved) ? "192.168.3.77" : ipSaved;
+
+        var llmPortSaved = Preferences.Get("llm_port", "");
+
+        LlmPortEntry.Placeholder = llmPortSaved.ToString();
+
+        var sdPortSaved = Preferences.Get("sd_port", "");
+
+        SdPortEntry.Placeholder = sdPortSaved.ToString();
+
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        var ip = Preferences.Get("llm_ip", "");
-        if (!string.IsNullOrWhiteSpace(ip)) PingLabel.Text = await PingOllamaAsync(ip);
+
+        var ip = string.IsNullOrWhiteSpace(IpEntry.Text)? IpEntry.Placeholder:IpEntry.Text;
+
+        if (!string.IsNullOrWhiteSpace(ip)) PingLabel.Text = await PingIpAsync(ip);
     }
+
     #region Overlay (для меню)
     private void OnMenuOverlayTapped(object sender, EventArgs e)
     {
@@ -151,58 +161,82 @@ public partial class SettingsPage : ContentPage
     #region IP (Сохранения/сброс/пинг)
     private async void OnSaveIpClicked(object sender, EventArgs e)
     {
-        var ip = IpEntry.Text?.Trim();
+        var ipSaved = Preferences.Get("llm_ip", "");
+        var llmPortSaved = Preferences.Get("llm_port", 11434);
+        var sdPortSaved = Preferences.Get("sd_port", 25566);
+
+        var ip = string.IsNullOrWhiteSpace(IpEntry.Text) ? ipSaved : IpEntry.Text.Trim();
+        var llmPort = int.TryParse(LlmPortEntry.Text, out var lp) ? lp : llmPortSaved;
+        var sdPort = int.TryParse(SdPortEntry.Text, out var sp) ? sp : sdPortSaved;
 
         if (string.IsNullOrWhiteSpace(ip))
         {
-            DisplayAlert("Ошибка", "Введите корректный IP и порт, например 192.168.1.100:11434", "Ок");
+            await DisplayAlert("Ошибка", "Введите IP (Например 192.168.3.77)", "Ок");
+
+            return;
+        }
+        if (llmPort is < 1 or > 65535)
+        {
+            await DisplayAlert("Ошибка", "Некорректный порт LLM", "Ок");
+
+            return;
+        }
+        if (sdPort is < 1 or > 65535)
+        {
+            await DisplayAlert("Ошибка", "Некорректный порт SD", "Ок");
+
             return;
         }
 
-        Preferences.Set("llm_ip", ip);
-        DisplayAlert("Успешно","Адрес сохранен","Ок");
-        IpEntry.Placeholder= Preferences.Get("llm_ip", "");
-        PingLabel.Text= await PingOllamaAsync(ip);
+        if (ip != ipSaved) Preferences.Set("llm_ip", ip);
+        if (sdPort != sdPortSaved) Preferences.Set("sd_port", sdPort);
+        if (llmPort != llmPortSaved) Preferences.Set("llm_port", llmPort);
+
+        PingLabel.Text= await PingIpAsync(ip);
+
+        await DisplayAlert("Ок", $"LLM: {ip}:{llmPort}\n SD: {ip}:{sdPort}", "Ок");
     }
 
-    private void OnResetIpClicked(object sender, EventArgs e)
+    private async void OnResetIpClicked(object sender, EventArgs e)
     {
-        IpEntry.Text = Preferences.Get("llm_ip","");
-        DisplayAlert("Сброс", "Адрес сброшен", "Ок");
+        IpEntry.Text = LlmPortEntry.Text = SdPortEntry.Text = string.Empty;
+
+        IpEntry.Placeholder = Preferences.Get("llm_ip", "");
+
+        LlmPortEntry.Placeholder = Preferences.Get("llm_port", 11434).ToString();
+
+        SdPortEntry.Placeholder = Preferences.Get("sd_port", 25566).ToString();
+
+        var ip = string.IsNullOrWhiteSpace(IpEntry.Text) ? IpEntry.Placeholder : IpEntry.Text;
+
+        if (!string.IsNullOrWhiteSpace(ip)) PingLabel.Text = await PingIpAsync(ip);
     }
 
 
-    private async Task<string> PingOllamaAsync(string ip)
+    private async Task<string> PingIpAsync(string ip)
     {
         try
         {
-            var baseUrl = $"http://{ip}";
+            using var p = new Ping(); var r = await p.SendPingAsync(ip, 2000);
 
-            using var http = new HttpClient { BaseAddress = new Uri(baseUrl), Timeout = TimeSpan.FromSeconds(3) };
-
-            var sw = Stopwatch.StartNew();
-
-            var resp = await http.GetAsync("/api/tags");
-
-            sw.Stop();
-
-            if (!resp.IsSuccessStatusCode) return $"Ошибка ping ({(int)resp.StatusCode})";
-
-            return $"Ок ({sw.ElapsedMilliseconds} ms)";
+            return r.Status == IPStatus.Success ? $"Ок({r.RoundtripTime} ms)" : "Ошибка";
         }
-        catch (Exception ex)
+        catch
         {
-            Device.BeginInvokeOnMainThread(() =>
-            {
-
-                DisplayAlert("Ошибка ping", ex.Message, "Ок");
-
-            });
             return "Ошибка";
         }
     }
 
-    #endregion
+    private string EffectiveIp()=> string.IsNullOrWhiteSpace(IpEntry.Text)? IpEntry.Placeholder: IpEntry.Text;
 
+    private int EffectivePort(Entry e, string prefKey, int defVal)
+    {
+        if (int.TryParse(e.Text, out var p)) return p;
+
+        if(int.TryParse(e.Placeholder, out var ph)) return ph;
+
+        return Preferences.Get(prefKey, defVal);
+    }
+    #endregion
 
 }

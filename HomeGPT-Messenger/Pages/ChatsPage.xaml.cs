@@ -94,10 +94,37 @@ public partial class ChatsPage : ContentPage
         bool confirm = await DisplayAlert("Удалить чат", $"Удалить \"{chatForMenu.Name}\"?", "Да", "Нет");
 		if (confirm)
 		{
+			var mediaToCheck = chatForMenu.Messages.Where(m => !string.IsNullOrEmpty(m.ImagePath))
+			.Select(m=> m.ImagePath!).ToList();
+
 			chats.Remove(chatForMenu);
 			await ChatStorageService.SaveChatsAsync(chats);
-			ChatsList.ItemsSource = null;
+
+			CleanupUnusedMedia(mediaToCheck, chats);
+
+			ChatsList.ItemsSource= null;
 			ChatsList.ItemsSource = chats;
+        }
+	}
+
+	private void CleanupUnusedMedia(List<string> paths, List<Chat> allChats)
+	{
+		foreach (var path in paths)
+		{
+			bool usedSomewhereElse=allChats.SelectMany(c=>c.Messages).Any(m=>m.ImagePath==path);
+			
+			if (!usedSomewhereElse && File.Exists(path))
+			{
+				try
+				{
+					File.Delete(path);
+					System.Diagnostics.Debug.WriteLine($"[CLEANUP] Удален файл {path}");
+				}
+				catch (Exception ex)
+				{
+					System.Diagnostics.Debug.WriteLine($"[CLEANUP ERROR] {ex.Message}");
+				}
+			}
 		}
 	}
     private async void Popup_CancelPressed(Object sender, EventArgs e)

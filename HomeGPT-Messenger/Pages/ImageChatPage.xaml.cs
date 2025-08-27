@@ -14,8 +14,14 @@ public partial class ImageChatPage : ContentPage
 	private Chat Chat => _allChats.First(c => c.Id == _chatId);
 
 	private CancellationTokenSource? _cts;
-	private string SdHost => Preferences.Get("sd_host", "192.168.3.77:25566");
+	private string BuildSdUrl()
+	{
+		var ip = Preferences.Get("llm_ip", "");
 
+		var port = Preferences.Get("sd_port", 1);
+
+		return $"{ip}:{port}";
+	}
 	public ImageChatPage(Guid chatId, List<Chat> allChats)
 	{
 		InitializeComponent();
@@ -39,6 +45,7 @@ public partial class ImageChatPage : ContentPage
 
 		ScrollToBottom();
     }
+
     #region Menu
     private void OnMenuButtonClicked(object sender, EventArgs e)
 	{
@@ -190,7 +197,7 @@ public partial class ImageChatPage : ContentPage
 				height = Chat.SdHeight
 			};
 
-			var resp = await http.PostAsJsonAsync($"http://{SdHost}/txt2img", body, _cts.Token);
+			var resp = await http.PostAsJsonAsync($"http://{BuildSdUrl()}/txt2img", body, _cts.Token);
 
 			resp.EnsureSuccessStatusCode();
 

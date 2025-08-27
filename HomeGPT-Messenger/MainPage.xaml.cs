@@ -22,10 +22,14 @@ namespace HomeGPT_Messenger
         private CancellationTokenSource _typingStatusCts;//для удобной работы анимации
         private CancellationTokenSource _requestCts;
 
-        //private const string OLLAMA_URL = "http://192.168.3.77:11434/api/chat";
+        private string BuildOllamaUrl()
+        {
+            var ip = Preferences.Get("llm_ip", "");
 
-        private string OLLAMA_URL = $"http://{Preferences.Get("llm_ip","")}/api/chat";// "http://192.168.3.77:11434/api/chat";
+            var port = Preferences.Get("llm_port", 11434);
 
+            return $"http://{ip}:{port}/api/chat";
+        }
         public MainPage(Guid chatId,List<Chat> chats)
         {
             InitializeComponent();
@@ -261,7 +265,7 @@ namespace HomeGPT_Messenger
                 //});
                 //await DisplayAlert("Отправляймые", jsonReq, "OK");
 
-                var response = await client.PostAsJsonAsync(OLLAMA_URL, reqObj,ct);
+                var response = await client.PostAsJsonAsync(BuildOllamaUrl(), reqObj,ct);
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadFromJsonAsync<OllamaResponse>(cancellationToken: ct);
